@@ -15,6 +15,15 @@ let mainWindow;
 
 let updateStatus = 'checking-for-update';
 
+let browser_options = {
+    width: 800,
+    height: 450
+}
+
+if(!process.env.ELECTRON_START_URL){
+    browser_options['webPreferences']['devTools'] = false;
+}
+
 const sendStatusToWindow = (txt) => {
     console.log("sending msg", txt)
     if(mainWindow){
@@ -34,10 +43,7 @@ ipcMain.on('hangup', (event, arg) => {
 function createWindow () {
   console.log('READY')
   // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 800,
-    height: 450
-  })
+  mainWindow = new BrowserWindow(browser_options);
 
   const START_URL = process.env.ELECTRON_START_URL || url.format({
     pathname: path.join(__dirname, 'index.html'),
