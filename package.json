@@ -1,10 +1,10 @@
 {
   "name": "ElucidatVideo",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "private": true,
   "author": "Freaky Turtle",
   "main": "public/electron.js",
-  "productName": "Elucidat Video",
+  "productName": "ElucidatVideo",
   "homepage": "./",
   "dependencies": {
     "electron-updater": "^2.21.10",
@@ -24,7 +24,7 @@
     "eject": "react-scripts eject",
     "electron": "electron .",
     "electron-dev": "ELECTRON_START_URL=http://localhost:3000/ && electron .",
-    "react-start": "react-scripts start",
+    "react-start": "BROWSER=none react-scripts start",
     "start": "ELECTRON_START_URL=http://localhost:3000/ concurrently \"npm run react-start\" \"wait-on http://localhost:3000 && npm run electron .\"",
     "pack": "build --dir",
     "dist": "build",
@@ -40,7 +40,8 @@
     ],
     "directories": {
       "buildResources": "assets"
-    }
+    },
+    "extends": null
   },
   "devDependencies": {
     "concurrently": "^3.5.1",

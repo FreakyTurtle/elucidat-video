@@ -9,11 +9,11 @@ let isSpeaking = '';
 var pcs = {};
 // var turnReady;
 
-// var pcConfig = {
-//   'iceServers': [{
-//     'urls': 'stun:stun.l.google.com:19302'
-//   }]
-// };
+var pcConfig = {
+  'iceServers': [{
+    'urls': 'stun:stun.l.google.com:19302'
+  }]
+};
 
 // var sdpConstraints = {
 //   offerToReceiveAudio: true,
@@ -147,7 +147,7 @@ const hangup = () => {
                 delete remoteStreams[key];
             }
         }
-        
+
         localStream.getTracks().forEach(track => track.stop());
         localStream = undefined;
         remoteStreams = undefined;
@@ -272,7 +272,7 @@ const maybeStart = (fromId) => {
 
 const createPeerConnection = (localStream, id) => {
   try {
-    let pc = new RTCPeerConnection(null);
+    let pc = new RTCPeerConnection(pcConfig);
     pc.onicecandidate = handleIceCandidate;
     pc.onaddstream = (event) => { return handleRemoteStreamAdded(event, id); };
     pc.onremovestream = (event) => { return handleRemoteStreamRemoved(event, id)} ;

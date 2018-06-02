@@ -56,9 +56,9 @@ class AppWelcome extends React.Component {
       gettingUpdates: false,
       updatePerc: 0
     }
-    
+
   }
-  
+
     componentDidMount() {
         if (isElectron()) {
             ipcRenderer.send('ping');
@@ -66,7 +66,7 @@ class AppWelcome extends React.Component {
             ipcRenderer.on('pong', this.updateStatus);
         }
     }
-    
+
     updateStatus = (event, text) => {
         console.log("received msg: ", text);
         if(this.props.checkedUpdates){
@@ -79,7 +79,7 @@ class AppWelcome extends React.Component {
             });
             return;
         }
-        
+
         switch (text) {
             case 'error':
             case 'update-not-available':
@@ -100,7 +100,7 @@ class AppWelcome extends React.Component {
                 break;
             default:
                 return;
-                
+
         }
     }
 
@@ -114,7 +114,7 @@ class AppWelcome extends React.Component {
       disabled
     });
   }
-  
+
   checkUpdates = (cu, gu) => {
       if(!cu){
           return (
@@ -149,6 +149,7 @@ class AppWelcome extends React.Component {
         <div>
           <img alt="logo" src={logo}/>
         </div>
+        <div>{window.require('electron').remote.app.getVersion()}</div>
         <hr />
         {this.checkUpdates(this.props.checkedUpdates, this.state.gettingUpdates)}
       </form>
