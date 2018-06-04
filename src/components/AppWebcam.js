@@ -65,6 +65,7 @@ export default class AppEditor extends React.Component {
     // this.handleShareClick = this.handleShareClick.bind(this);
     this.returnShareText = this.returnShareText.bind(this);
     this.toggleScreenshare = this.toggleScreenshare.bind(this);
+    this.changeSelected = this.changeSelected.bind(this);
 
     this.state = {
       streams: {},
@@ -80,7 +81,7 @@ export default class AppEditor extends React.Component {
     };
 
   }
-  
+
   componentDidMount() {
       if(!this.state.streams.length){
         socketapi.init(this.props.room)
@@ -113,9 +114,18 @@ export default class AppEditor extends React.Component {
       socketapi.onStreamRemoved((event) => {
         console.log("=====Client stream removed: ", event.detail);
         let id = event.detail;
+        let activeStream = this.state.activeStream;
+        let selectedStream = this.state.selectedStream;
+
+        if(id === activeStream){
+          activeStream = 'local';
+        }
+        if(id === selectedStream){
+          selectedStream = "";
+        }
         let streams = { ...this.state.streams};
         delete streams[id];
-        this.setState({streams});
+        this.setState({streams, activeStream, selectedStream});
       });
 
       socketapi.onStreamChanged((event) => {
@@ -209,10 +219,26 @@ export default class AppEditor extends React.Component {
 
   }
 
+  changeSelected = (id) => {
+    if(this.state.selectedStream === id){
+      this.setState({
+        selectedStream: ''
+      });
+    }else{
+      this.setState({
+        selectedStream: id
+      });
+    }
+  }
+
   returnSmallVideo = (key, index) => {
     let size = Object.keys(this.state.streams).length;
+    let border = {border: '0px solid #ffffff'}
+    if(key === this.state.selectedStream || (key === this.state.activeStream && this.state.selectedStream === "")){
+      border = {border: '2px solid #ffffff'};
+    }
     return (
-      <video autoPlay id={key} key={key} ref={(vid) => this.refVideo(vid, key)} style={{...styles.smallvideo, width: (size > 5) ? (100 / size) + '%' : '20%'}} />
+      <video autoPlay onClick={() => this.changeSelected(key)} id={key} key={key} ref={(vid) => this.refVideo(vid, key)} style={{...styles.smallvideo, ...border, width: (size > 5) ? (100 / size) + '%' : '20%'}} />
     );
   }
 
@@ -376,6 +402,7 @@ toggleScreenshare = () => {
             everyoneMuted={this.state.everyoneMuted}
             toggleMuteEveryone={this.toggleMuteEveryone}
             onHangup={this.doHangup}
+            room={this.props.room}
          />
 
          <SourcesDialog

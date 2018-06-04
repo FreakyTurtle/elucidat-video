@@ -17,11 +17,14 @@ let updateStatus = 'checking-for-update';
 
 let browser_options = {
     width: 800,
-    height: 450
+    height: 450,
+    webPreferences: {
+      devTools: false
+    }
 }
 
-if(!process.env.ELECTRON_START_URL){
-    browser_options['webPreferences']['devTools'] = false;
+if(process.env.ELECTRON_START_URL){
+    browser_options['webPreferences']['devTools'] = true;
 }
 
 const sendStatusToWindow = (txt) => {

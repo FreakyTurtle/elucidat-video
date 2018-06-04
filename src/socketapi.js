@@ -11,7 +11,7 @@ var pcs = {};
 
 var pcConfig = {
   'iceServers': [{
-    'urls': 'stun:stun.l.google.com:19302'
+    'urls': ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302']
   }]
 };
 
@@ -379,14 +379,18 @@ const handleRemoteHangup = (id) => {
 }
 
 const stop = (id) => {
-  pcs[id].close();
-  pcs[id] = undefined;
-  delete pcs[id];
-  remoteStreams[id] = undefined;
-  delete remoteStreams[id];
-  console.log(remoteStreams);
-  let removedEvent = new CustomEvent('streamRemoved', { detail: id });
-  window.dispatchEvent(removedEvent);
+  try {
+    pcs[id].close();
+    pcs[id] = undefined;
+    delete pcs[id];
+    remoteStreams[id] = undefined;
+    delete remoteStreams[id];
+  } catch (e) {
+    console.log(e);
+  } finally {
+    let removedEvent = new CustomEvent('streamRemoved', { detail: id });
+    window.dispatchEvent(removedEvent);
+  }
 }
 
 

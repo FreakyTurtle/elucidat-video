@@ -1,12 +1,16 @@
 import React from 'react';
 import IconButton from 'material-ui/IconButton';
 import FontIcon from 'material-ui/FontIcon';
+import Theme from '../theme.js'
 
 let styles = {
     button: {
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
     },
-    color: "#ffffff"
+    icon: {
+      fontSize: 18,
+      color: "#ffffff"
+    },
 };
 
 export default class SourcesDialog extends React.Component {
@@ -16,12 +20,15 @@ export default class SourcesDialog extends React.Component {
       this.returnBtn = this.returnBtn.bind(this);
       this.micBtn = this.micBtn.bind(this);
       this.screenBtn = this.screenBtn.bind(this);
+      this.state = {
+        visible: true
+      }
     }
 
     returnBtn = (text, classes, tooltipPosition, onclick = () => false) => {
         return (
-            <IconButton tooltipPosition={tooltipPosition} onClick={onclick} style={styles.button} tooltip={text} >
-              <FontIcon color={styles.color} className={classes} />
+            <IconButton tooltipPosition={tooltipPosition} iconStyle={styles.icon} onClick={onclick} style={styles.button} tooltip={text} >
+              <FontIcon className={classes}  />
             </IconButton>
         );
     }
@@ -82,6 +89,7 @@ export default class SourcesDialog extends React.Component {
           <div
             style={this.props.style}
           >
+            <div style={{...styles.icon, ...styles.button, "padding": 12, "fontFamily": Theme.fontFamily, minHeight: 48, boxSizing: 'border-box'}}>{this.props.room}</div>
             {this.hangupBtn(this.props.onHangup)}
             {this.cameraBtn(this.props.streamingVideo, this.props.onCameraClick)}
             {this.micBtn(this.props.streamingAudio, this.props.onMicClick)}

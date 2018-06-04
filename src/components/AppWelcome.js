@@ -39,6 +39,16 @@ const style = {
         width: '100%',
         height: '30%',
         textAlign: 'center'
+    },
+    info: {
+      position: 'absolute',
+      padding: 3,
+      fontSize: '0.7em',
+      bottom: 0,
+      right: 0
+    },
+    hint: {
+      textAlign: 'center'
     }
 }
 
@@ -134,6 +144,7 @@ class AppWelcome extends React.Component {
               <div style={style.container}>
               <TextField
                 floatingLabelText="Join or Create Room"
+                hintStyle={style.hint}
                 onChange={this.onChangeInput}
               />
               <RaisedButton label="Let's Go!" disabled={this.state.disabled} primary={true} onClick={() => this.props.action.gotoRoom(this.state.room)} />
@@ -149,7 +160,7 @@ class AppWelcome extends React.Component {
         <div>
           <img alt="logo" src={logo}/>
         </div>
-        <div>{window.require('electron').remote.app.getVersion()}</div>
+        <div style={style.info}>{"version " + window.require('electron').remote.app.getVersion()}</div>
         <hr />
         {this.checkUpdates(this.props.checkedUpdates, this.state.gettingUpdates)}
       </form>

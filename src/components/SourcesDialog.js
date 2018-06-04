@@ -16,13 +16,15 @@ export default class SourcesDialog extends React.Component {
       };
     }
 
+
+
     render() {
       const actions = [
         <FlatButton
           label="Ok"
           primary={true}
           keyboardFocused={true}
-          onClick={this.handleClose}
+          onClick={this.props.onRequestClose}
         />,
       ];
         return(
@@ -32,6 +34,7 @@ export default class SourcesDialog extends React.Component {
               modal={false}
               open={this.props.open}
               onRequestClose={this.props.onRequestClose}
+              autoScrollBodyContent={true}
             >
               <SourcesPicker
                 sources={this.props.sources}

@@ -1,14 +1,11 @@
 {
   "name": "ElucidatVideo",
-<<<<<<< HEAD
-  "version": "0.2.1",
-=======
-  "version": "0.2.0",
->>>>>>> b59250072ed1f849bfc63fa1d6c0e4a60b0041a8
+  "version": "0.2.5",
   "private": true,
   "author": "Freaky Turtle",
   "main": "public/electron.js",
-  "productName": "ElucidatVideo",
+  "productName": "Elucidat Video",
+  "description": "Elucidat Video",
   "homepage": "./",
   "dependencies": {
     "electron-updater": "^2.21.10",
@@ -34,7 +31,7 @@
     "dist": "build",
     "electron-pack": "build -c.extraMetadata.main=build/electron.js",
     "preelectron-pack": "npm run build",
-    "gh-publish": "electron-builder -mwl -c.extraMetadata.main=build/electron.js -p always"
+    "gh-publish": "build -mwl -c.extraMetadata.main=build/electron.js -p always"
   },
   "build": {
     "appId": "com.elucidat.video",
@@ -44,8 +41,7 @@
     ],
     "directories": {
       "buildResources": "assets"
-    },
-    "extends": null
+    }
   },
   "devDependencies": {
     "concurrently": "^3.5.1",
