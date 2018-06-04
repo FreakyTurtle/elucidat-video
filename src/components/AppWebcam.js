@@ -138,9 +138,11 @@ export default class AppEditor extends React.Component {
 
       socketapi.onActiveChange((event) => {
         console.log("======Active Stream change: ", event.detail);
-        this.setState({
-          activeStream: event.detail
-        });
+        if(this.state.activeStream !== event.detail){
+            this.setState({
+              activeStream: event.detail
+            });
+        }
       })
 
       desktopCapturer.getSources({types: ['window', 'screen'], thumbnailSize:{width:180, height:180}}, (error, sources) => {
@@ -194,27 +196,33 @@ export default class AppEditor extends React.Component {
       //handling small videos
       console.log("ref: ", this.state.streams[i])
       vid.srcObject = this.state.streams[i];
-      if(i === 'local'){
-        vid.muted = true;
-      }
       if(this.state.everyoneMuted){
         vid.muted = true;
       }else if(this.state.selectedStream !== "" && i === this.state.selectedStream){
         // a stream has been selected and its this one
         vid.volume = 1;
+        vid.muted = false;
       }else if(this.state.selectedStream === "" && this.state.activeStream !== 'local' && this.state.activeStream === i){
         //a stream has not been selected, but the active stream is set and its this one
         vid.volume = 1;
+        vid.muted = false;
       }else if(this.state.selectedStream === "" && this.state.activeSteam === 'local'){
         // no stream selected or active, give this and all videos volume 1
         vid.volume = 1;
+        vid.muted = false;
       }else if(this.state.selectedStream !== "" || this.state.activeSteam === 'local'){
         //either a stream has been selected or one is active, but its not this one so volume down a bit
         vid.volume = 0.7;
+        vid.muted = false;
       }else{
         //something's wrong, default to 1
         vid.volume = 1;
+        vid.muted = false;
       }
+    }
+    
+    if(i === 'local'){
+      vid.muted = true;
     }
 
   }
@@ -325,9 +333,15 @@ toggleScreenshare = () => {
     }
   }
   toggleMuteEveryone = () => {
-    this.setState({
-      everyoneMuted : !this.state.everyoneMuted
-    })
+      if(this.state.everyoneMuted){
+          this.setState({
+            everyoneMuted : false
+        });
+      }else{
+          this.setState({
+            everyoneMuted : true
+        });
+      }
   }
 
   ///////////////////screensharing////////////////////
