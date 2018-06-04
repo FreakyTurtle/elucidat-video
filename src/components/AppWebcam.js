@@ -2,6 +2,7 @@ import React from 'react';
 import {socketapi} from '../socketapi';
 import SourcesDialog from './SourcesDialog';
 import AppControls from './AppControls';
+import AppVideo from './AppVideo';
 const {desktopCapturer} = window.require('electron');
 
 const styles = {
@@ -58,7 +59,6 @@ export default class AppEditor extends React.Component {
     this.handleClick = this.handleClick.bind(this);
     this.returnSmallVideo = this.returnSmallVideo.bind(this);
     this.returnSmallVideos = this.returnSmallVideos.bind(this);
-    this.refVideo = this.refVideo.bind(this);
     this.muteVideo = this.muteVideo.bind(this);
     this.unmuteVideo = this.unmuteVideo.bind(this);
     this.handleVideoMuting = this.handleVideoMuting.bind(this);
@@ -66,6 +66,8 @@ export default class AppEditor extends React.Component {
     this.returnShareText = this.returnShareText.bind(this);
     this.toggleScreenshare = this.toggleScreenshare.bind(this);
     this.changeSelected = this.changeSelected.bind(this);
+    this.returnSrcObject = this.returnSrcObject.bind(this);
+    
 
     this.state = {
       streams: {},
@@ -77,7 +79,8 @@ export default class AppEditor extends React.Component {
       videoZoom: 'cover',
       selectedStream: '',
       activeStream: 'local',
-      everyoneMuted: false
+      everyoneMuted: false, 
+      videoRefs: {}
     };
 
   }
@@ -180,52 +183,52 @@ export default class AppEditor extends React.Component {
   }
 
   ///////////////// Video stream //////////////////////////////
-  refVideo = (vid, i) => {
-      console.log("ref")
-    if(!vid) return;
-    if(vid.id === '1'){
-        console.log("big video")
-      //this is the big video
-      vid.muted =true;
-      if(this.state.selectedStream !== ""){
-        vid.srcObject = this.state.streams[this.state.selectedStream];
-      }else{
-        vid.srcObject = this.state.streams[this.state.activeStream];
-      }
-    }else{
-      //handling small videos
-      console.log("ref: ", this.state.streams[i])
-      vid.srcObject = this.state.streams[i];
-      if(this.state.everyoneMuted){
-        vid.muted = true;
-      }else if(this.state.selectedStream !== "" && i === this.state.selectedStream){
-        // a stream has been selected and its this one
-        vid.volume = 1;
-        vid.muted = false;
-      }else if(this.state.selectedStream === "" && this.state.activeStream !== 'local' && this.state.activeStream === i){
-        //a stream has not been selected, but the active stream is set and its this one
-        vid.volume = 1;
-        vid.muted = false;
-      }else if(this.state.selectedStream === "" && this.state.activeSteam === 'local'){
-        // no stream selected or active, give this and all videos volume 1
-        vid.volume = 1;
-        vid.muted = false;
-      }else if(this.state.selectedStream !== "" || this.state.activeSteam === 'local'){
-        //either a stream has been selected or one is active, but its not this one so volume down a bit
-        vid.volume = 0.7;
-        vid.muted = false;
-      }else{
-        //something's wrong, default to 1
-        vid.volume = 1;
-        vid.muted = false;
-      }
-    }
-    
-    if(i === 'local'){
-      vid.muted = true;
-    }
-
-  }
+  // refVideo = (vid, i) => {
+  //     console.log("ref")
+  //   if(!vid) return;
+  //   if(vid.id === '1'){
+  //       console.log("big video")
+  //     //this is the big video
+  //     vid.muted =true;
+  //     if(this.state.selectedStream !== ""){
+  //       vid.srcObject = this.state.streams[this.state.selectedStream];
+  //     }else{
+  //       vid.srcObject = this.state.streams[this.state.activeStream];
+  //     }
+  //   }else{
+  //     //handling small videos
+  //     console.log("ref: ", this.state.streams[i])
+  //     vid.srcObject = this.state.streams[i];
+  //     if(this.state.everyoneMuted){
+  //       vid.muted = true;
+  //     }else if(this.state.selectedStream !== "" && i === this.state.selectedStream){
+  //       // a stream has been selected and its this one
+  //       vid.volume = 1;
+  //       vid.muted = false;
+  //     }else if(this.state.selectedStream === "" && this.state.activeStream !== 'local' && this.state.activeStream === i){
+  //       //a stream has not been selected, but the active stream is set and its this one
+  //       vid.volume = 1;
+  //       vid.muted = false;
+  //     }else if(this.state.selectedStream === "" && this.state.activeSteam === 'local'){
+  //       // no stream selected or active, give this and all videos volume 1
+  //       vid.volume = 1;
+  //       vid.muted = false;
+  //     }else if(this.state.selectedStream !== "" || this.state.activeSteam === 'local'){
+  //       //either a stream has been selected or one is active, but its not this one so volume down a bit
+  //       vid.volume = 0.7;
+  //       vid.muted = false;
+  //     }else{
+  //       //something's wrong, default to 1
+  //       vid.volume = 1;
+  //       vid.muted = false;
+  //     }
+  //   }
+  // 
+  //   if(i === 'local'){
+  //     vid.muted = true;
+  //   }
+  // 
+  // }
 
   changeSelected = (id) => {
     if(this.state.selectedStream === id){
@@ -245,8 +248,29 @@ export default class AppEditor extends React.Component {
     if(key === this.state.selectedStream || (key === this.state.activeStream && this.state.selectedStream === "")){
       border = {border: '2px solid #ffffff'};
     }
+    let muted = false;
+    let volume = 1;
+    if(key === 'local' || this.state.everyoneMuted){
+        muted = true;
+        volume = 0;
+    }
+    if(this.state.selectedStream !== '' && this.state.slectedStream !== key){
+        volume = 0.7;
+    }else if (this.state.activeStream !== 'local' && this.state.activeSteam !==key){
+        volume = 0.7;
+    }
     return (
-      <video autoPlay onClick={() => this.changeSelected(key)} id={key} key={key} ref={(vid) => this.refVideo(vid, key)} style={{...styles.smallvideo, ...border, width: (size > 5) ? (100 / size) + '%' : '20%'}} />
+      <AppVideo
+        onclick={() => this.changeSelected(key)}
+        key={key}
+        muted={muted}
+        srcObject={this.state.streams[key]}
+        volume={volume}
+        style={{
+            ...styles.smallvideo, 
+            ...border, 
+            width: (size > 5) ? (100 / size) + '%' : '20%'
+        }} />
     );
   }
 
@@ -254,6 +278,7 @@ export default class AppEditor extends React.Component {
     let videos = [];
     let c = this;
     Object.keys(this.state.streams).forEach(function(key) {
+        console.log("ADDING VIDEO FOR: " + key);
       videos.push(c.returnSmallVideo(key));
     });
     return videos;
@@ -393,14 +418,47 @@ toggleScreenshare = () => {
         this.props.onHangup();
     });
   }
+  
+  returnSrcObject = () => {
+      if(this.state.selectedStream){
+          return this.state.streams[this.state.selectedStream]
+      }
+      return this.state.streams[this.state.activeStream];
+  }
+  
+  returnBigVideo = (key, index) => {
+    let size = Object.keys(this.state.streams).length;
+    let bigStyle = {
+        visibility: false,
+        objectFit: this.state.videoZoom
+    };
+    if(key === this.state.selectedStream || (key === this.state.activeStream && this.state.selectedStream === "")){
+      bigStyle = {
+          ...styles.mainvideo,
+          visibility:true,
+          objectFit: this.state.videoZoom
+      };
+    }
+    let muted = true;
+    let volume = 0;
+    let style
+    return (
+      <AppVideo
+        onclick={() => this.changeSelected(key)}
+        key={"BIG:" +key}
+        muted={muted}
+        srcObject={this.state.streams[key]}
+        volume={volume}
+        style={bigStyle} />
+    );
+  }
 
   render() {
     return (
       <div>
-        <video muted style={{...styles.mainvideo, objectFit: this.state.videoZoom}} onClick={this.handleClickStop} id={1} ref={(vid) => this.refVideo(vid, this.state.activeStream, this.state.selectedStream)} autoPlay/>
+      {Object.keys(this.state.streams).map(this.returnBigVideo)}
         <div style={styles.panel}>
-          {Object.keys(this.state.streams).map(this.returnSmallVideo)
-          }
+          {Object.keys(this.state.streams).map(this.returnSmallVideo)}
         </div>
 
         <AppControls

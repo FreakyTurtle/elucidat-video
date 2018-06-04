@@ -1,6 +1,6 @@
 {
   "name": "ElucidatVideo",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "private": true,
   "author": "Freaky Turtle",
   "main": "public/electron.js",
