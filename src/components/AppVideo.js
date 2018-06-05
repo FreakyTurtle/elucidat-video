@@ -10,9 +10,8 @@ export default class AppVideo extends React.Component {
         this.video;
         this.socketapi = window.socketapi
     }
-    
+
     shouldComponentUpdate(nextProps, nextState) {
-        console.log("SCU")
         let ret = false;
         //possible props are: muted, thisKey, srcObject, volume, onclick and style, only style/onclick/thisKey should trigger re-render
         this.video.muted = nextProps.muted;
@@ -24,10 +23,10 @@ export default class AppVideo extends React.Component {
         }
         return ret;
     }
-    
+
     refVideo = (vid) => {
         if(!vid) return;
-        
+
         vid.muted = this.props.muted;
         vid.volume = this.props.volume;
         vid.srcObject = this.props.srcObject;

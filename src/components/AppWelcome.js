@@ -1,6 +1,7 @@
 import React from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
+import AutoComplete from 'material-ui/AutoComplete';
 import CircularProgress from 'material-ui/CircularProgress';
 import LinearProgress from 'material-ui/LinearProgress';
 import {CardText} from 'material-ui/Card';
@@ -60,11 +61,14 @@ class AppWelcome extends React.Component {
     this.onChangeInput = this.onChangeInput.bind(this);
     this.checkUpdates = this.checkUpdates.bind(this);
     this.updateStatus = this.updateStatus.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.rooms = JSON.parse(localStorage.getItem("rooms"));
     this.state = {
       room: '',
       disabled: true,
       gettingUpdates: false,
-      updatePerc: 0
+      updatePerc: 0,
+      dataSource: [],
     }
 
   }
@@ -114,14 +118,23 @@ class AppWelcome extends React.Component {
         }
     }
 
-  onChangeInput = (event, newValue) => {
+  onChangeInput = (newValue) => {
     let disabled = true;
+    let dataSource = [];
     if(newValue){
       disabled = false;
+      if(this.rooms){
+        for (var i = 0; i < this.rooms.length; i++) {
+          if(this.rooms[i].indexOf(newValue) > -1){
+            dataSource.push(this.rooms[i]);
+          }
+        }
+      }
     }
     this.setState({
       room: newValue,
-      disabled
+      disabled,
+      dataSource
     });
   }
 
@@ -142,21 +155,44 @@ class AppWelcome extends React.Component {
       }else{
           return (
               <div style={style.container}>
-              <TextField
+              <AutoComplete
                 floatingLabelText="Join or Create Room"
                 hintStyle={style.hint}
-                onChange={this.onChangeInput}
+                onUpdateInput={this.onChangeInput}
+                dataSource={this.state.dataSource}
               />
-              <RaisedButton label="Let's Go!" disabled={this.state.disabled} primary={true} onClick={() => this.props.action.gotoRoom(this.state.room)} />
+              <RaisedButton label="Let's Go!" disabled={this.state.disabled} primary={true} onClick={this.handleSubmit} />
             </div>
           )
       }
+  }
+
+  handleSubmit = () => {
+    if(!this.state.disabled){
+      if(!this.rooms){
+        let newRooms = [this.state.room];
+        console.log("SETTING NEW ROOMS", newRooms);
+        localStorage.setItem("rooms", JSON.stringify(newRooms));
+      }else if(this.rooms.indexOf(this.state.room) === -1){
+        let newRooms = [...this.rooms, this.state.room];
+        if(newRooms.length > 50){
+          newRooms.shift();
+        }
+        localStorage.setItem("rooms", JSON.stringify(newRooms));
+      }else{
+        let newRooms = [...this.rooms];
+        newRooms.push(newRooms.splice(newRooms.indexOf(this.state.room), 1)[0]);
+        localStorage.setItem("rooms", JSON.stringify(newRooms));
+      }
+      this.props.action.gotoRoom(this.state.room);
+    }
+    return false;
   }
   // handleChange = (event, index, value) => this.setState({value});
 
   render() {
     return (
-      <form style={style.fill}>
+      <form style={style.fill} onSubmit={this.handleSubmit}>
         <div>
           <img alt="logo" src={logo}/>
         </div>

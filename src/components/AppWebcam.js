@@ -3,6 +3,7 @@ import {socketapi} from '../socketapi';
 import SourcesDialog from './SourcesDialog';
 import AppControls from './AppControls';
 import AppVideo from './AppVideo';
+import {red500} from 'material-ui/styles/colors';
 const {desktopCapturer} = window.require('electron');
 
 const styles = {
@@ -33,7 +34,6 @@ const styles = {
   smallvideo: {
     maxWidth: '20%',
     objectFit: 'cover',
-    maxHeight: 120,
     zIndex: 2,
     overflow: 'hidden',
     minWidth: '12.5%'
@@ -67,7 +67,8 @@ export default class AppEditor extends React.Component {
     this.toggleScreenshare = this.toggleScreenshare.bind(this);
     this.changeSelected = this.changeSelected.bind(this);
     this.returnSrcObject = this.returnSrcObject.bind(this);
-    
+
+
 
     this.state = {
       streams: {},
@@ -79,7 +80,7 @@ export default class AppEditor extends React.Component {
       videoZoom: 'cover',
       selectedStream: '',
       activeStream: 'local',
-      everyoneMuted: false, 
+      everyoneMuted: false,
       videoRefs: {}
     };
 
@@ -183,52 +184,6 @@ export default class AppEditor extends React.Component {
   }
 
   ///////////////// Video stream //////////////////////////////
-  // refVideo = (vid, i) => {
-  //     console.log("ref")
-  //   if(!vid) return;
-  //   if(vid.id === '1'){
-  //       console.log("big video")
-  //     //this is the big video
-  //     vid.muted =true;
-  //     if(this.state.selectedStream !== ""){
-  //       vid.srcObject = this.state.streams[this.state.selectedStream];
-  //     }else{
-  //       vid.srcObject = this.state.streams[this.state.activeStream];
-  //     }
-  //   }else{
-  //     //handling small videos
-  //     console.log("ref: ", this.state.streams[i])
-  //     vid.srcObject = this.state.streams[i];
-  //     if(this.state.everyoneMuted){
-  //       vid.muted = true;
-  //     }else if(this.state.selectedStream !== "" && i === this.state.selectedStream){
-  //       // a stream has been selected and its this one
-  //       vid.volume = 1;
-  //       vid.muted = false;
-  //     }else if(this.state.selectedStream === "" && this.state.activeStream !== 'local' && this.state.activeStream === i){
-  //       //a stream has not been selected, but the active stream is set and its this one
-  //       vid.volume = 1;
-  //       vid.muted = false;
-  //     }else if(this.state.selectedStream === "" && this.state.activeSteam === 'local'){
-  //       // no stream selected or active, give this and all videos volume 1
-  //       vid.volume = 1;
-  //       vid.muted = false;
-  //     }else if(this.state.selectedStream !== "" || this.state.activeSteam === 'local'){
-  //       //either a stream has been selected or one is active, but its not this one so volume down a bit
-  //       vid.volume = 0.7;
-  //       vid.muted = false;
-  //     }else{
-  //       //something's wrong, default to 1
-  //       vid.volume = 1;
-  //       vid.muted = false;
-  //     }
-  //   }
-  // 
-  //   if(i === 'local'){
-  //     vid.muted = true;
-  //   }
-  // 
-  // }
 
   changeSelected = (id) => {
     if(this.state.selectedStream === id){
@@ -245,7 +200,9 @@ export default class AppEditor extends React.Component {
   returnSmallVideo = (key, index) => {
     let size = Object.keys(this.state.streams).length;
     let border = {border: '0px solid #ffffff'}
-    if(key === this.state.selectedStream || (key === this.state.activeStream && this.state.selectedStream === "")){
+    if(key === this.state.selectedStream) {
+      border = {border: '2px solid', borderColor: red500};
+    }else if(key === this.state.activeStream && this.state.selectedStream === ""){
       border = {border: '2px solid #ffffff'};
     }
     let muted = false;
@@ -267,8 +224,8 @@ export default class AppEditor extends React.Component {
         srcObject={this.state.streams[key]}
         volume={volume}
         style={{
-            ...styles.smallvideo, 
-            ...border, 
+            ...styles.smallvideo,
+            ...border,
             width: (size > 5) ? (100 / size) + '%' : '20%'
         }} />
     );
@@ -418,14 +375,14 @@ toggleScreenshare = () => {
         this.props.onHangup();
     });
   }
-  
+
   returnSrcObject = () => {
       if(this.state.selectedStream){
           return this.state.streams[this.state.selectedStream]
       }
       return this.state.streams[this.state.activeStream];
   }
-  
+
   returnBigVideo = (key, index) => {
     let size = Object.keys(this.state.streams).length;
     let bigStyle = {
