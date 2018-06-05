@@ -67,6 +67,7 @@ class AppWelcome extends React.Component {
       room: '',
       disabled: true,
       gettingUpdates: false,
+      checkedUpdates: false,
       updatePerc: 0,
       dataSource: [],
     }
@@ -83,9 +84,7 @@ class AppWelcome extends React.Component {
 
     updateStatus = (event, text) => {
         console.log("received msg: ", text);
-        if(this.props.checkedUpdates){
-            return;
-        }
+        
         if(text.indexOf('download-progress') > -1){
             let perc = parseInt(text.split(':')[1], 10)
             this.setState({
@@ -97,18 +96,20 @@ class AppWelcome extends React.Component {
         switch (text) {
             case 'error':
             case 'update-not-available':
-                this.props.action.checkedUpdates();
                 this.setState({
+                    checkedUpdates: true,
                     gettingUpdates: false
                 });
                 break;
             case 'update-downloaded':
                 this.setState({
+                    checkedUpdates: true,
                     updatePerc: 100
                 });
                 break;
             case 'update-available':
                 this.setState({
+                    checkedUpdates: true,
                     gettingUpdates: true
                 });
                 break;
@@ -198,7 +199,7 @@ class AppWelcome extends React.Component {
         </div>
         <div style={style.info}>{"version " + window.require('electron').remote.app.getVersion()}</div>
         <hr />
-        {this.checkUpdates(this.props.checkedUpdates, this.state.gettingUpdates)}
+        {this.checkUpdates(this.state.checkedUpdates, this.state.gettingUpdates)}
       </form>
     );
   }

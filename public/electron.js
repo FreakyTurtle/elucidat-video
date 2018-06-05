@@ -119,9 +119,9 @@ autoUpdater.on('update-not-available', () => {
     updateStatus = 'update-not-available';
     sendStatusToWindow('update-not-available');
 });
-autoUpdater.on('error', () => {
+autoUpdater.on('error', (e) => {
     updateStatus ='error';
-    sendStatusToWindow('error');
+    sendStatusToWindow('error: ' + e.toString());
 });
 autoUpdater.on('download-progress', (progresObj) => {
     updateStatus ='update-available';
