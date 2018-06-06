@@ -9,34 +9,28 @@ const {desktopCapturer} = window.require('electron');
 const styles = {
   panel: {
     width: '100%',
+    height: '100%',
     display: 'flex',
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'center',
     alignItems:'center',
-    flexWrap: 'wrap-reverse',
+    flexWrap: 'wrap',
     position: 'fixed',
-    bottom: 0
+    backgroundColor: 'black'
   },
   input: {
     position: 'relative',
     left: 500
   },
-  mainvideo: {
-    position:'fixed',
-    top:0,
-    left:0,
-    right:0,
-    bottom:0,
-    width:'100%',
-    height: '100%',
-    backgroundColor: 'black'
+  smallvideoContainer: {
+    minWidth: '6.25%',
+    minHeight: '33.33%',
+    overflow: 'hidden'
   },
   smallvideo: {
-    maxWidth: '20%',
+    width: '100%',
+    height: '100%',
     objectFit: 'cover',
-    zIndex: 2,
-    overflow: 'hidden',
-    minWidth: '12.5%'
   },
   controls: {
     display: 'flex',
@@ -58,7 +52,6 @@ export default class AppEditor extends React.Component {
 
     this.handleClick = this.handleClick.bind(this);
     this.returnSmallVideo = this.returnSmallVideo.bind(this);
-    this.returnSmallVideos = this.returnSmallVideos.bind(this);
     this.muteVideo = this.muteVideo.bind(this);
     this.unmuteVideo = this.unmuteVideo.bind(this);
     this.handleVideoMuting = this.handleVideoMuting.bind(this);
@@ -67,6 +60,7 @@ export default class AppEditor extends React.Component {
     this.toggleScreenshare = this.toggleScreenshare.bind(this);
     this.changeSelected = this.changeSelected.bind(this);
     this.returnSrcObject = this.returnSrcObject.bind(this);
+    this.getSize = this.getSize.bind(this);
 
 
 
@@ -94,7 +88,11 @@ export default class AppEditor extends React.Component {
           this.setState({
             streams: {
               ...this.state.streams,
-              'local': stream
+              'local': stream,
+              'local2': stream,
+              'local3': stream,
+              'local4': stream,
+              'local5': stream,
             },
             streamingVideo: true,
             streamingAudio: true
@@ -183,63 +181,6 @@ export default class AppEditor extends React.Component {
     }
   }
 
-  ///////////////// Video stream //////////////////////////////
-
-  changeSelected = (id) => {
-    if(this.state.selectedStream === id){
-      this.setState({
-        selectedStream: ''
-      });
-    }else{
-      this.setState({
-        selectedStream: id
-      });
-    }
-  }
-
-  returnSmallVideo = (key, index) => {
-    let size = Object.keys(this.state.streams).length;
-    let border = {border: '0px solid #ffffff'}
-    if(key === this.state.selectedStream) {
-      border = {border: '2px solid', borderColor: red500};
-    }else if(key === this.state.activeStream && this.state.selectedStream === ""){
-      border = {border: '2px solid #ffffff'};
-    }
-    let muted = false;
-    let volume = 1;
-    if(key === 'local' || this.state.everyoneMuted){
-        muted = true;
-        volume = 0;
-    }
-    if(this.state.selectedStream !== '' && this.state.slectedStream !== key){
-        volume = 0.7;
-    }else if (this.state.activeStream !== 'local' && this.state.activeSteam !==key){
-        volume = 0.7;
-    }
-    return (
-      <AppVideo
-        onclick={() => this.changeSelected(key)}
-        key={key}
-        muted={muted}
-        srcObject={this.state.streams[key]}
-        volume={volume}
-        style={{
-            ...styles.smallvideo,
-            ...border,
-            width: (size > 5) ? (100 / size) + '%' : '20%'
-        }} />
-    );
-  }
-
-  returnSmallVideos = () => {
-    let videos = [];
-    let c = this;
-    Object.keys(this.state.streams).forEach(function(key) {
-        console.log("ADDING VIDEO FOR: " + key);
-      videos.push(c.returnSmallVideo(key));
-    });
-    return videos;
-  }
 
 ///////////// Handle Dialog //////////////
 handleOpen = () => {
@@ -383,37 +324,145 @@ toggleScreenshare = () => {
       return this.state.streams[this.state.activeStream];
   }
 
-  returnBigVideo = (key, index) => {
-    let size = Object.keys(this.state.streams).length;
-    let bigStyle = {
-        visibility: false,
-        objectFit: this.state.videoZoom
-    };
-    if(key === this.state.selectedStream || (key === this.state.activeStream && this.state.selectedStream === "")){
-      bigStyle = {
-          ...styles.mainvideo,
-          visibility:true,
-          objectFit: this.state.videoZoom
-      };
+  ///////////////// Video stream //////////////////////////////
+
+  changeSelected = (id) => {
+    if(this.state.selectedStream === id){
+      this.setState({
+        selectedStream: ''
+      });
+    }else{
+      this.setState({
+        selectedStream: id
+      });
     }
-    let muted = true;
-    let volume = 0;
-    let style
+  }
+
+  getSize = (size, index) => {
+    console.log("GETTING: " +index, size)
+    let width = '100%';
+    let height = '100%';
+    switch (size) {
+      case 2:
+        width = "50%";
+        break;
+      case 3:
+        if(index > (size/2) && index !== size){
+          //bottom row
+          width = "100%";
+        }else{
+          //top row
+          width = "50%";
+        }
+        height = "50%";
+        break;
+      case 4:
+        width = "50%";
+        height = "50%";
+        break;
+      case 5:
+       console.log("index: "+ index + " > " + (size/2)+" and size: "+size);
+        if(index > (size/2) && index !== size){
+          //bottom row
+          width = "50%";
+        }else{
+          //top row
+          width = "33.33%";
+        }
+        height = "50%";
+        break;
+      case 6:
+        width = "33.33%";
+        height = "50%";
+        break;
+      case 7:
+        if(index > (size/2) && index !== size){
+          //bottom row
+          width = "33.33%";
+        }else{
+          //top row
+          width = "25%";
+        }
+        height = "50%";
+        break;
+      case 8:
+        width = "25%";
+        height = "50%";
+        break;
+      default:
+        return {width:'25%'}
+    }
+    return {height, width};
+
+  }
+
+  returnSmallVideo = (key, index) => {
+    let size = Object.keys(this.state.streams).length;
+    console.log("INDEX: " +index);
+    let hw = this.getSize(size, index);
+    let style = {
+      ...styles.smallvideoContainer,
+      ...hw
+    }
+    console.log("height", style.height);
+    console.log("width", style.width);
+
+
+    let border = {border: '0px solid #ffffff'}
+    if(key === this.state.selectedStream) {
+      border = {border: '2px solid', borderColor: red500};
+    }else if(key === this.state.activeStream && this.state.selectedStream === ""){
+      border = {border: '2px solid #ffffff'};
+    }
+    let muted = false;
+    let volume = 1;
+    if(key === 'local' || this.state.everyoneMuted){
+        muted = true;
+        volume = 0;
+    }
+    if(this.state.selectedStream !== '' && this.state.slectedStream !== key){
+        volume = 0.7;
+    }else if (this.state.activeStream !== 'local' && this.state.activeSteam !==key){
+        volume = 0.7;
+    }
     return (
-      <AppVideo
-        onclick={() => this.changeSelected(key)}
-        key={"BIG:" +key}
-        muted={muted}
-        srcObject={this.state.streams[key]}
-        volume={volume}
-        style={bigStyle} />
+      <div style={style} key={key}>
+        <AppVideo
+          onclick={() => this.changeSelected(key)}
+          key={key}
+          muted={muted}
+          srcObject={this.state.streams[key]}
+          volume={volume}
+          style={styles.smallvideo} />
+      </div>
+
     );
   }
 
   render() {
+    // let width = "100%";
+    let height = "100%";
+    if(Object.keys(this.state.streams).length > 1){
+      height: "50%";
+    }
+    // if(this.state.streams.length > 2){
+    //   let width = "50%";
+    // }
+    // if(this.state.streams.length > 4){
+    //   let width =  parseInt((100/3)) + "%";
+    // }
+    // if(this.state.streams.length > 6){
+    //   let width =  "25%";
+    // }
+    // if(this.state.streams.length > 8){
+    //   let width =  "20%";
+    // }
+    let style = {
+      // width,
+      height
+    }
     return (
       <div>
-      {Object.keys(this.state.streams).map(this.returnBigVideo)}
         <div style={styles.panel}>
           {Object.keys(this.state.streams).map(this.returnSmallVideo)}
         </div>

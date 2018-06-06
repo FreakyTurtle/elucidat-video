@@ -17,8 +17,7 @@ export default class AppVideo extends React.Component {
         this.video.muted = nextProps.muted;
         this.video.srcObject = nextProps.srcObject;
         this.video.volume = nextProps.volume;
-        nextProps.style !== this.props.style;
-        if(nextProps.onclick !== this.props.onclick || nextProps.thisKey !== this.props.thisKey){
+        if(nextProps.style !== this.props.style || nextProps.onclick !== this.props.onclick || nextProps.thisKey !== this.props.thisKey){
             ret = true;
         }
         return ret;
