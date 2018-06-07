@@ -3,7 +3,7 @@ import * as Actions from '../actions/navigate';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import AppWelcome from './AppWelcome';
-import AppWebcam from './AppWebcam';
+import AppRoom from './AppRoom';
 
 const { ipcRenderer } = window.require('electron');
 
@@ -18,7 +18,7 @@ class Navigator extends Component {
       console.log("NAV:", nav)
       switch (nav.page) {
         case 'IN_ROOM':
-          return <AppWebcam
+          return <AppRoom
             room={nav.room}
             onHangup={() => {
                 console.log('DO IT')
