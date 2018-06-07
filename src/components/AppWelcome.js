@@ -84,7 +84,7 @@ class AppWelcome extends React.Component {
 
     updateStatus = (event, text) => {
         console.log("received msg: ", text);
-        
+
         if(text.indexOf('download-progress') > -1){
             let perc = parseInt(text.split(':')[1], 10)
             this.setState({
@@ -160,6 +160,7 @@ class AppWelcome extends React.Component {
                 floatingLabelText="Join or Create Room"
                 hintStyle={style.hint}
                 onUpdateInput={this.onChangeInput}
+                onNewRequest={this.handleSubmit}
                 dataSource={this.state.dataSource}
               />
               <RaisedButton label="Let's Go!" disabled={this.state.disabled} primary={true} onClick={this.handleSubmit} />
@@ -168,24 +169,24 @@ class AppWelcome extends React.Component {
       }
   }
 
-  handleSubmit = () => {
+  handleSubmit = (room = this.state.room, index) => {
     if(!this.state.disabled){
       if(!this.rooms){
-        let newRooms = [this.state.room];
+        let newRooms = [room];
         console.log("SETTING NEW ROOMS", newRooms);
         localStorage.setItem("rooms", JSON.stringify(newRooms));
-      }else if(this.rooms.indexOf(this.state.room) === -1){
-        let newRooms = [...this.rooms, this.state.room];
+      }else if(this.rooms.indexOf(room) === -1){
+        let newRooms = [...this.rooms, room];
         if(newRooms.length > 50){
           newRooms.shift();
         }
         localStorage.setItem("rooms", JSON.stringify(newRooms));
       }else{
         let newRooms = [...this.rooms];
-        newRooms.push(newRooms.splice(newRooms.indexOf(this.state.room), 1)[0]);
+        newRooms.push(newRooms.splice(newRooms.indexOf(room), 1)[0]);
         localStorage.setItem("rooms", JSON.stringify(newRooms));
       }
-      this.props.action.gotoRoom(this.state.room);
+      this.props.action.gotoRoom(room);
     }
     return false;
   }

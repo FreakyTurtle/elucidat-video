@@ -61,10 +61,6 @@ class AppRoom extends React.Component {
 
     this.handleClick = this.handleClick.bind(this);
     this.returnSmallVideo = this.returnSmallVideo.bind(this);
-    this.returnSmallVideos = this.returnSmallVideos.bind(this);
-    this.muteVideo = this.muteVideo.bind(this);
-    this.unmuteVideo = this.unmuteVideo.bind(this);
-    this.handleVideoMuting = this.handleVideoMuting.bind(this);
     // this.handleShareClick = this.handleShareClick.bind(this);
     this.returnShareText = this.returnShareText.bind(this);
     this.toggleScreenshare = this.toggleScreenshare.bind(this);
@@ -125,7 +121,7 @@ class AppRoom extends React.Component {
         let id = event.detail;
         // let activeStream = this.state.activeStream;
         // let selectedStream = this.state.selectedStream;
-        // 
+        //
         // if(id === activeStream){
         //   activeStream = 'local';
         // }
@@ -334,14 +330,14 @@ toggleScreenshare = () => {
       }
   }
 
-  ///////////////////screensharing////////////////////
-  returnShareText = () => {
-    if(this.state.screensharing){
-      return 'SCREENSHARING ON';
-    }else{
-      return 'SCREENSHARING OFF';
-    }
-  }
+  // ///////////////////screensharing////////////////////
+  // returnShareText = () => {
+  //   if(this.state.screensharing){
+  //     return 'SCREENSHARING ON';
+  //   }else{
+  //     return 'SCREENSHARING OFF';
+  //   }
+  // }
 
   selectedSource = (source) => {
     console.log("SELECTED SOURCE: ", source);
@@ -417,7 +413,7 @@ toggleScreenshare = () => {
         style={bigStyle} />
     );
   }
-  
+
   returnSmallVideo = (stream, index) => {
       return (
           <AppVideo
