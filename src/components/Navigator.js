@@ -18,14 +18,9 @@ class Navigator extends Component {
       console.log("NAV:", nav)
       switch (nav.page) {
         case 'IN_ROOM':
-          return <AppRoom
+          return (<AppRoom
             room={nav.room}
-            onHangup={() => {
-                console.log('DO IT')
-                ipcRenderer.send('hangup');
-                // this.props.action.gotoWelcome   ---- it should be this but ugh
-            }}
-           />
+           />)
         case 'WELCOME':
           return <AppWelcome />
         default:

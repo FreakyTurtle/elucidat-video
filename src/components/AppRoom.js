@@ -66,7 +66,7 @@ class AppRoom extends React.Component {
     this.toggleScreenshare = this.toggleScreenshare.bind(this);
     this.changeSelected = this.changeSelected.bind(this);
     this.returnSrcObject = this.returnSrcObject.bind(this);
-
+    window.socketapi = socketapi;
 
 
     this.state = {
@@ -280,55 +280,55 @@ toggleScreenshare = () => {
 }
 
 ///////////// VIDEO MUTING //////////////////////
-  muteVideo = () => {
-    socketapi.muteVideo();
-    this.setState({
-      streamingVideo: false
-    });
-  }
-  unmuteVideo = () => {
-    socketapi.unmuteVideo();
-    this.setState({
-      streamingVideo: true
-    });
-  }
-  handleVideoMuting = () => {
-    if(this.state.streamingVideo){
-      this.muteVideo();
-    }else{
-      this.unmuteVideo();
-    }
-  }
-  muteAudio = () => {
-    socketapi.muteAudio();
-    this.setState({
-      streamingAudio: false
-    });
-  }
-  unmuteAudio = () => {
-    socketapi.unmuteAudio();
-    this.setState({
-      streamingAudio: true
-    });
-  }
-  handleAudioMuting = () => {
-    if(this.state.streamingAudio){
-      this.muteAudio();
-    }else{
-      this.unmuteAudio();
-    }
-  }
-  toggleMuteEveryone = () => {
-      if(this.state.everyoneMuted){
-          this.setState({
-            everyoneMuted : false
-        });
-      }else{
-          this.setState({
-            everyoneMuted : true
-        });
-      }
-  }
+  // muteVideo = () => {
+  //   socketapi.muteVideo();
+  //   this.setState({
+  //     streamingVideo: false
+  //   });
+  // }
+  // unmuteVideo = () => {
+  //   socketapi.unmuteVideo();
+  //   this.setState({
+  //     streamingVideo: true
+  //   });
+  // }
+  // handleVideoMuting = () => {
+  //   if(this.state.streamingVideo){
+  //     this.muteVideo();
+  //   }else{
+  //     this.unmuteVideo();
+  //   }
+  // }
+  // muteAudio = () => {
+  //   socketapi.muteAudio();
+  //   this.setState({
+  //     streamingAudio: false
+  //   });
+  // }
+  // unmuteAudio = () => {
+  //   socketapi.unmuteAudio();
+  //   this.setState({
+  //     streamingAudio: true
+  //   });
+  // }
+  // handleAudioMuting = () => {
+  //   if(this.state.streamingAudio){
+  //     this.muteAudio();
+  //   }else{
+  //     this.unmuteAudio();
+  //   }
+  // }
+  // toggleMuteEveryone = () => {
+  //     if(this.state.everyoneMuted){
+  //         this.setState({
+  //           everyoneMuted : false
+  //       });
+  //     }else{
+  //         this.setState({
+  //           everyoneMuted : true
+  //       });
+  //     }
+  // }
 
   // ///////////////////screensharing////////////////////
   // returnShareText = () => {

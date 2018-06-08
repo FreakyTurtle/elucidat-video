@@ -4,6 +4,9 @@ import FontIcon from 'material-ui/FontIcon';
 import Theme from '../theme.js';
 import {red500} from 'material-ui/styles/colors';
 
+const { desktopCapturer, ipcRenderer } = window.require('electron');
+let socketapi;
+
 let styles = {
     button: {
         backgroundColor: 'rgba(0, 0, 0, 0.5)'
@@ -25,10 +28,15 @@ export default class AppControls extends React.Component {
       this.returnBtn = this.returnBtn.bind(this);
       this.micBtn = this.micBtn.bind(this);
       this.screenBtn = this.screenBtn.bind(this);
+      socketapi = window.socketapi;
       this.state = {
-        visible: true
+        visible: true,
+        dialogopen: false,
+        sources: {}
       }
     }
+
+    ///////// RENDER THE BUTTONS /////////////////
 
     returnBtn = (text, classes, tooltipPosition, style = styles.icon, onclick = () => false) => {
         return (
@@ -38,11 +46,11 @@ export default class AppControls extends React.Component {
         );
     }
 
-    cameraBtn = (streamingVideo, onclick) => {
+    cameraBtn = (mutedVideo, onclick) => {
         let text = "Hide"
         let classes = "fas fa-eye"
         let style = styles.icon;
-        if(!streamingVideo){
+        if(mutedVideo){
             text = "Unhide";
             classes = "fas fa-eye-slash";
             style = styles.icoff;
@@ -51,11 +59,11 @@ export default class AppControls extends React.Component {
         return this.returnBtn(text, classes, "bottom-center", style, onclick);
     }
 
-    micBtn = (streamingAudio, onclick) => {
+    micBtn = (mutedAudio, onclick) => {
         let text = "Mute Microphone";
         let classes = "fas fa-microphone-alt";
         let style = styles.icon;
-        if(!streamingAudio){
+        if(mutedAudio){
             text = "Unmute Microphone";
             classes = "fas fa-microphone-alt-slash";
             style = styles.icoff;
@@ -94,6 +102,82 @@ export default class AppControls extends React.Component {
     hangupBtn = (onclick) => {
       return this.returnBtn("Hangup", "fas fa-phone-slash", "bottom-center", styles.icoff, onclick)
     }
+    
+    
+    ///////// HANDLE THE CLICKS /////////
+    
+    
+    //Hang up the call and leave the room
+    onHangup = () => {
+        socketapi.hangup().then(() => {
+            console.log("hung up socket");
+            ipcRenderer.send('hangup');
+        });
+    }
+    
+    //change redux state to signal the local video stream should be muted
+    handleVideoMuting = () => {
+        if(this.props.mutedVideo){
+            socketapi.unmuteVideo();
+        }else{
+            socketapi.muteVideo();
+        }
+        this.props.action.toggleMuteVideo();
+    }
+    
+    onMicClick = () => {
+        if(this.props.mutedMic){
+            socketapi.unmuteMic();
+        }else{
+            socketapi.muteMic();
+        }
+        this.props.action.toggleMuteMic();
+    }
+    
+    toggleMuteAll = () => {
+        this.props.action.toggleMuteAll();
+    }
+    
+    toggleZoom = () => {
+        this.props.action.toggleZoom();
+    }
+    
+    onScreenShareClick = () => { 
+        if(this.props.screensharing){
+            socketapi.screenshare(false, null)
+                .then((stream) => {
+                    this.props.action.toggleScreenshare();
+                }).catch(error => {
+                    console.log(error.message);
+                })
+        }else{
+            desktopCapturer.getSources({
+                types: ['window', 'screen'],
+                thumbnailSize:{width:180, height:180}
+            }, (error, sources) => {
+                this.setState({
+                   sources,
+                   dialogopen: true
+                });
+            })
+        }
+    }
+    
+    handleOpen = () => {
+      this.setState({dialogopen: true});
+    };
+
+    handleClose = () => {
+      this.setState({dialogopen: false});
+    };
+    
+    selectedSource = (source) => {
+        // set the source - redux?
+        if(this.props.screensharing){
+            socketapi.screenshare(true, source)
+        }
+        socketapi.screenshare(true, source)
+    }
 
     render() {
         return(
@@ -101,12 +185,20 @@ export default class AppControls extends React.Component {
             style={this.props.style}
           >
             <div style={{...styles.icon, ...styles.button, "padding": 12, "fontFamily": Theme.fontFamily, minHeight: 48, boxSizing: 'border-box'}}>{this.props.room}</div>
-            {this.hangupBtn(this.props.onHangup)}
-            {this.cameraBtn(this.props.streamingVideo, this.props.onCameraClick)}
-            {this.micBtn(this.props.streamingAudio, this.props.onMicClick)}
-            {this.muteBtn(this.props.everyoneMuted, this.props.toggleMuteEveryone)}
-            {this.zoomBtn(this.props.zoom, this.props.onToggleZoom)}
-            {this.screenBtn(this.props.isScreenSharing, this.props.onScreenShareClick)}
+            {this.hangupBtn(this.onHangup)}
+            {this.cameraBtn(this.props.mutedVideo, this.handleVideoMuting)}
+            {this.micBtn(this.props.mutedMic, this.onMicClick)}
+            {this.muteBtn(this.props.mutedAll, this.toggleMuteAll)}
+            {this.zoomBtn(this.props.zoom, this.onToggleZoom)}
+            {this.screenBtn(this.props.screensharing, this.onScreenShareClick)}
+            
+            {this.inputPicker}
+            <SourcesDialog
+                open={this.state.dialogopen}
+                sources={this.state.sources}
+                onSelection={this.selectedSource}
+                onRequestClose={this.handleClose}
+              />
           </div>
         )
     }
