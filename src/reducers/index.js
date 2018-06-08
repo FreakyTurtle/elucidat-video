@@ -15,9 +15,9 @@ const rootReducer = combineReducers({
   navigation,
   checkedUpdates,
   streams,
-  mutedVideo,
-  mutedAll,
-  mutedMic,
+  muteVideo,
+  muteAll,
+  muteMic,
   screensharing,
   streamIds,
   zoom
