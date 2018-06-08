@@ -186,9 +186,9 @@ export default class AppControls extends React.Component {
           >
             <div style={{...styles.icon, ...styles.button, "padding": 12, "fontFamily": Theme.fontFamily, minHeight: 48, boxSizing: 'border-box'}}>{this.props.room}</div>
             {this.hangupBtn(this.onHangup)}
-            {this.cameraBtn(this.props.mutedVideo, this.handleVideoMuting)}
-            {this.micBtn(this.props.mutedMic, this.onMicClick)}
-            {this.muteBtn(this.props.mutedAll, this.toggleMuteAll)}
+            {this.cameraBtn(this.props.muteVideo, this.handleVideoMuting)}
+            {this.micBtn(this.props.muteMic, this.onMicClick)}
+            {this.muteBtn(this.props.muteAll, this.toggleMuteAll)}
             {this.zoomBtn(this.props.zoom, this.onToggleZoom)}
             {this.screenBtn(this.props.screensharing, this.onScreenShareClick)}
             
