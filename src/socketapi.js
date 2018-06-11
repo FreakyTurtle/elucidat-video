@@ -482,7 +482,7 @@ const doCall = (id) => {
     handleCreateOfferError);
 }
 
-const setLocalAndSendMessage = (sessionDescription, id, bw=[default_bandwidth * 0.1, default_bandwidth * 0.9]) => {
+const setLocalAndSendMessage = (sessionDescription, id, bw=[((default_bandwidth * 0.1) > 50) ? (default_bandwidth * 0.1) : 50, default_bandwidth * 0.9]) => {
   pcs[id].setLocalDescription(sessionDescription);
   console.log('setLocalAndSendMessage sending message', sessionDescription);
   sessionDescription.sdp = setMediaBitrates(sessionDescription.sdp, bw);
