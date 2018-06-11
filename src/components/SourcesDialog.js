@@ -8,9 +8,6 @@ import FlatButton from 'material-ui/FlatButton';
 export default class SourcesDialog extends React.Component {
     constructor(props) {
       super(props);
-      // this.handleShareToggle = this.handleShareToggle.bind(this);
-      // this.handleClose = this.handleClose.bind(this);
-      // this.handleSelection = this.handleSelection.bind(this);
       this.state = {
         open: false,
       };

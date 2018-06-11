@@ -6,7 +6,34 @@ let remoteStreams = {};
 let room;
 let isSpeaking = '';
 
-var pcs = {};
+var pcs = window.pcs = {};
+var timestampPrev = 0;
+var bytesPrev = 0;
+
+window.stats = (pc) => {
+  pc.getStats((results) => {
+    // calculate video bitrate
+    console.log("res: ", results)
+  results.forEach(function(report) {
+    var now = report.timestamp;
+
+    var bitrate;
+    if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
+      var bytes = report.bytesReceived;
+      if (timestampPrev) {
+        bitrate = 8 * (bytes - bytesPrev) / (now - timestampPrev);
+        bitrate = Math.floor(bitrate);
+      }
+      bytesPrev = bytes;
+      timestampPrev = now;
+    }
+    if (bitrate) {
+      bitrate += ' kbits/sec';
+      console.log("bitrate", bitrate);
+    }
+  });
+  })
+}
 // var turnReady;
 
 var pcConfig = {
@@ -14,6 +41,8 @@ var pcConfig = {
     'urls': ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302']
   }]
 };
+
+var default_bandwidth = 'auto';
 
 // var sdpConstraints = {
 //   offerToReceiveAudio: true,
@@ -49,10 +78,18 @@ var screenshare_constraints = {
 //// SOCKET STUFF TO SET UP ROOM
 
 socket.on('created', function(room, id) {
+  let createdEvent = new CustomEvent('roomcreated', { detail: id });
+  window.dispatchEvent(createdEvent);
   console.log('Created room ' + room);
+  if(localStream){
+    let addedEvent = new CustomEvent('streamAdded', { detail: 'local' });
+    window.dispatchEvent(addedEvent);
+  }
 });
 
 socket.on('full', function(room) {
+  let fullEvent = new CustomEvent('roomfull', { detail: room });
+  window.dispatchEvent(fullEvent);
   console.log('Room ' + room + ' is full');
 });
 
@@ -64,7 +101,13 @@ socket.on('join', function (room, id){
 });
 
 socket.on('joined', function(room) {
+  let joinedEvent = new CustomEvent('roomjoined', { detail: room });
+  window.dispatchEvent(joinedEvent);
   console.log('joined: ' + room);
+  if(localStream){
+    let addedEvent = new CustomEvent('streamAdded', { detail: 'local' });
+    window.dispatchEvent(addedEvent);
+  }
 });
 
 socket.on('log', function(array) {
@@ -79,6 +122,14 @@ const getLocalStream = () => localStream;
 const getRemoteStream = (id) => remoteStreams[id];
 
 
+const onRoomJoined = (callback) => {
+  window.addEventListener('roomjoined', callback);
+  window.addEventListener('roomcreated', callback);
+}
+
+const onRoomFull = (callback) => {
+  window.addEventListener('roomfull', callback);
+}
 
 const onStreamAdded = (callback) => {
   window.addEventListener('streamAdded', callback);
@@ -89,6 +140,10 @@ const onStreamRemoved = (callback) => {
 }
 const onStreamChanged = (callback) => {
   window.addEventListener('streamChanged', callback);
+}
+
+const onScreenshareToggle = (callback) => {
+  window.addEventListener('screenshareToggle', callback);
 }
 
 // const onLocalStreamAdded = (callback) => {
@@ -106,10 +161,14 @@ const unmuteVideo = () => {
   localStream.getVideoTracks()[0].enabled = true;
 }
 const muteAudio = () => {
-  localStream.getAudioTracks()[0].enabled = false;
+  for (var i = 0; i <localStream.getAudioTracks().length; i++) {
+    localStream.getAudioTracks()[i].enabled = false;
+  }
 }
 const unmuteAudio = () => {
-  localStream.getAudioTracks()[0].enabled = true;
+  for (var i = 0; i <localStream.getAudioTracks().length; i++) {
+    localStream.getAudioTracks()[i].enabled = true;
+  }
 }
 
 const screenshare = (sharingScreen, source) => {
@@ -132,6 +191,8 @@ const screenshare = (sharingScreen, source) => {
           }
       }
       console.log("localstream track", localStream.getVideoTracks()[0]);
+      let screenshareEvent = new CustomEvent('screenshareToggle');
+      window.dispatchEvent(screenshareEvent);
       resolve(localStream);
     }).catch(error => {
       reject(error);
@@ -219,11 +280,12 @@ socket.on('message', (fromId, msg) => {
           createPeerConnection(localStream, fromId);
           pcs[fromId].addStream(localStream);
         }
-        console.log(" got offer, sending answer");
+        console.log(" got offer, sending answer", msg);
         pcs[fromId].setRemoteDescription(new RTCSessionDescription(msg));
+        let bw = getBandwidth(msg.sdp);
         //dont be rude, send an answer
         //this gets our local session description, adds it to this PeerConnection, then sends it to the person who sent the offer as an answer
-        doAnswer(fromId);
+        doAnswer(fromId, bw);
         if(changingStreams){
             let changedEvent = new CustomEvent('streamChanged', { detail: fromId });
             window.dispatchEvent(changedEvent);
@@ -342,6 +404,77 @@ const handleRemoteStreamRemoved= (event, id) => {
   window.dispatchEvent(removedEvent);
 }
 
+
+const updateBandwidth = (bandwidth = 'auto') => {
+  for (var id in pcs) {
+    if (pcs.hasOwnProperty(id)) {
+      pcs[id].createOffer()
+      .then((offer) => {
+        default_bandwidth = bandwidth;
+        console.log("<<< bw:", default_bandwidth);
+        pcs[id].createOffer().then((offer) => {
+          setLocalAndSendMessage(offer, id)
+        });
+      }).catch((error) => {
+        console.log(error.message);
+      })
+
+    }
+  }
+}
+
+const setMediaBitrates = (sdp, bw) => {
+  if(default_bandwidth === 'auto'){
+    return setMediaBitrate(sdp, [2500 * 0.1, 2500 * 0.9]);
+  }
+  return setMediaBitrate(sdp, bw);
+}
+
+const getBandwidth = (sdp) => {
+  var lines = sdp.split("\n");
+  var ret = [];
+  for (var i = 0; i < lines.length; i++) {
+    if(lines[i].indexOf("b=AS:") > -1){
+      ret.push(parseInt(lines[i].split(":")[1]));
+    }
+  }
+  return ret;
+}
+
+const setMediaBitrate = (sdp, bandwidth) => {
+  console.log("BANDWIDTH: " + bandwidth);
+  var modifier = 'AS';
+  var count = 0;
+  var lines = sdp.split("\n");
+  var add_audio = 0;
+  var add_video = 0;
+  for (var i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    if(line.indexOf("m=audio") > -1){
+      if(lines[i+2].indexOf("b=AS") > -1){
+        lines[i+2] = "b=AS:"+bandwidth[0];
+      }else{
+        add_audio = i+2;
+      }
+    }
+    if(line.indexOf("m=video") > -1){
+      if(lines[i+2].indexOf("b=AS") > -1){
+        lines[i+2] = "b=AS:"+bandwidth[1];
+      }else{
+        add_video = i+2;
+      }
+    }
+  }
+  if(add_audio > 0){
+    lines.splice(add_audio, 0, "b=AS:"+bandwidth[0]);
+  }
+  if(add_video){
+    lines.splice((add_audio > 0) ? (add_video + 1) : add_video, 0, "b=AS:"+bandwidth[1]);
+  }
+
+  return lines.join("\n");
+}
+
 const doCall = (id) => {
   console.log('Sending offer to peer');
   pcs[id].createOffer().then(
@@ -349,9 +482,10 @@ const doCall = (id) => {
     handleCreateOfferError);
 }
 
-const setLocalAndSendMessage = (sessionDescription, id) => {
+const setLocalAndSendMessage = (sessionDescription, id, bw=[default_bandwidth * 0.1, default_bandwidth * 0.9]) => {
   pcs[id].setLocalDescription(sessionDescription);
   console.log('setLocalAndSendMessage sending message', sessionDescription);
+  sessionDescription.sdp = setMediaBitrates(sessionDescription.sdp, bw);
   sendMessage(sessionDescription, id);
 }
 
@@ -359,12 +493,12 @@ const handleCreateOfferError = (event) => {
   console.log('createOffer() error: ', event);
 }
 
-const doAnswer = (id) => {
+const doAnswer = (id, bw) => {
   console.log('Sending answer to peer.');
   pcs[id].createAnswer()
   .then(
     (sd) => {
-      setLocalAndSendMessage(sd, id);
+      setLocalAndSendMessage(sd, id, bw);
     }
   ).catch(onCreateSessionDescriptionError);
 }
@@ -406,12 +540,16 @@ const socketapi = {
   onStreamRemoved,
   onStreamChanged,
   onActiveChange,
+  onScreenshareToggle,
+  onRoomJoined,
+  onRoomFull,
   getRemoteStream,
   muteVideo,
   unmuteVideo,
   muteAudio,
   unmuteAudio,
   screenshare,
+  updateBandwidth,
   hangup
 }
 

@@ -12,3 +12,24 @@ export const removeStream = (item) => {
         item
     }
 }
+export const changeSelected= (item) => {
+    console.log('CHANGE SELECTED STREAM: ' + item);
+    return {
+        type: 'CHANGE_SELECTED',
+        item
+    }
+}
+export const unSelected= () => {
+    console.log('UNSELECTED STREAM');
+    return {
+        type: 'CHANGE_SELECTED',
+        item: ""
+    }
+}
+export const changeActive= (item) => {
+    console.log('CHANGE ACTIVE STREAM: ' + item);
+    return {
+        type: 'CHANGE_ACTIVE',
+        item
+    }
+}

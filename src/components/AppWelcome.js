@@ -163,7 +163,7 @@ class AppWelcome extends React.Component {
                 onNewRequest={this.handleSubmit}
                 dataSource={this.state.dataSource}
               />
-              <RaisedButton label="Let's Go!" disabled={this.state.disabled} primary={true} onClick={this.handleSubmit} />
+              <RaisedButton label="Let's Go!" disabled={this.state.disabled} primary={true} onClick={(event) => this.handleSubmit(this.state.room, 0)} />
             </div>
           )
       }
@@ -190,11 +190,10 @@ class AppWelcome extends React.Component {
     }
     return false;
   }
-  // handleChange = (event, index, value) => this.setState({value});
 
   render() {
     return (
-      <form style={style.fill} onSubmit={this.handleSubmit}>
+      <form style={style.fill} onSubmit={(event) => this.handleSubmit(this.state.room, 0)}>
         <div>
           <img alt="logo" src={logo}/>
         </div>

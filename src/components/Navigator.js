@@ -14,6 +14,13 @@ class Navigator extends Component {
         this.navigate = this.navigate.bind(this);
     }
 
+    shouldComponentUpdate(nextProps, nextState){
+      if(nextProps.navigation.room === this.props.navigation.room){
+        return false;
+      }
+      return true;
+    }
+
     navigate = (nav) => {
       console.log("NAV:", nav)
       switch (nav.page) {
@@ -35,7 +42,7 @@ class Navigator extends Component {
 
 function mapStateToProps(state, prop){
     return {
-        ...state
+        navigation: state.navigation
     };
 }
 

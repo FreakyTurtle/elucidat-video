@@ -6,3 +6,41 @@
     bottom: 0px;
     overflow-y: scroll;
 }
+
+.videoContainer{
+  /* Default video container styling */
+  max-width: 20%;
+  min-width: 8.33%;
+  height: 120px;
+  overflow: hidden;
+  box-sizing: border-box;
+  position: relative;
+  top: auto;
+  bottom: 0;
+  left: auto;
+  right: auto;
+}
+
+.videoContainer > video {
+  object-fit: cover;
+}
+.videoContainer.contain.focus > video {
+  object-fit: contain;
+}
+
+/* .videoContainer.active {
+  border: 3px solid white;
+}
+.videoContainer.selected {
+  border: 3px solid blue;
+} */
+.videoContainer.focus{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    min-height: 100%;
+    min-width: 100%;
+    z-index: -1;
+}

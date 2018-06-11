@@ -8,6 +8,8 @@ import muteAll from './muteAll';
 import muteMic from './muteMic';
 import screensharing from './screenshare';
 import streamIds from './streams';
+import activeStream from './activeStream';
+import selectedStream from './selectedStream';
 import zoom from './toggleZoom';
 
 const rootReducer = combineReducers({
@@ -20,6 +22,8 @@ const rootReducer = combineReducers({
   muteMic,
   screensharing,
   streamIds,
+  selectedStream,
+  activeStream,
   zoom
 });
 
