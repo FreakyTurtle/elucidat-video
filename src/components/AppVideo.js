@@ -6,7 +6,7 @@ import { connect } from 'react-redux';
 
 let style = {
   height: '100%',
-  width: '100%'
+  width: '100%',
 };
 
 let socketapi;
@@ -27,8 +27,8 @@ class AppVideo extends React.Component {
         }
       });
       socketapi.onStreamChanged((event) => {
-        if (this.props.thisKey !== 'local' && this.props.thisKey !== ""){
-          this.video.srcObject = socketapi.getRemoteStream(event.detail);
+        if (this.props.thisKey !== 'local' && this.props.thisKey !== "" && this.props.thisKey === event.detail){
+          this.video.srcObject = socketapi.getRemoteStream(this.props.thisKey);
         }
       })
     }
@@ -69,11 +69,15 @@ class AppVideo extends React.Component {
       if(this.props.thisKey === ''){
         return null;
       }
+      let s = {...style};
+      if(this.props.thisKey === 'local'){
+          s = {...style, transform: 'scale(-1, 1)'}
+      }
       return (
         <video
           autoPlay
           onClick={this.props.onclick}
-          style={style}
+          style={s}
           id={this.props.thisKey}
           key={this.props.thisKey}
           ref={this.refVideo}

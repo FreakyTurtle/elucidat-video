@@ -1,13 +1,16 @@
 import React from 'react';
 import {socketapi} from '../socketapi';
-import SourcesDialog from './SourcesDialog';
+import Dialog from 'material-ui/Dialog';
+import CircularProgress from 'material-ui/CircularProgress';
+import FlatButton from 'material-ui/FlatButton';
+import {CardText} from 'material-ui/Card';
 import AppControls from './AppControls';
 import * as Actions from '../actions';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import AppVideoContainer from './AppVideoContainer';
 import {red500} from 'material-ui/styles/colors';
-const {desktopCapturer} = window.require('electron');
+const { desktopCapturer, ipcRenderer } = window.require('electron');
 
 const styles = {
   panel: {
@@ -50,7 +53,13 @@ const styles = {
     position: 'fixed',
     width:'100%',
     top: 0
-  }
+},
+dialog: {
+    width: 400,
+    textAlign: 'center',
+    left: 'auto',
+    right: 'auto'
+}
 };
 
 
@@ -79,7 +88,7 @@ class AppRoom extends React.Component {
     socketapi.onRoomJoined((event) => {
       this.setState({
         roomState: 'joined'
-      })
+    });
     })
 
     socketapi.onRoomFull((event) => {
@@ -120,14 +129,53 @@ class AppRoom extends React.Component {
   }
 
   returnVideo = (streamId, index) => {
-    console.log("returning video: ", this.props.streamIds[streamId]);
-    console.log("at index: ", index);
       return (
           <AppVideoContainer
               key={index}
               thisKey={this.props.streamIds[streamId]}
               />
       )
+  }
+  
+  returnDialog = () => {
+      const actions = [
+      <FlatButton
+        label="Go Back"
+        primary={true}
+        onClick={() => {
+            socketapi.hangup().then(() => {
+                console.log("hung up socket");
+                ipcRenderer.send('hangup');
+            });
+        }}
+      />
+    ];
+      if(this.state.roomState === 'joining'){
+          return (
+              <Dialog
+                  title="Let's Get You Connected!"
+                  modal={false}
+                  open={true}
+                  contentStyle={styles.dialog}
+                >
+                <CircularProgress size={60} thickness={7} />
+                <CardText>Joining Room...</CardText>
+                </Dialog>
+          )
+      }else if(this.state.roomState === 'full'){
+          return (<Dialog
+              title="Oh Dear!"
+              modal={false}
+              actions={actions}
+              open={true}
+              contentStyle ={styles.dialog}
+            >
+            <CardText>Sorry! That room is full at the moment!</CardText>
+            
+            </Dialog>)
+      }else{
+          return null;
+      }
   }
 
   shouldComponentUpdate = (nextProps) => {
@@ -138,7 +186,6 @@ class AppRoom extends React.Component {
   }
 
   render() {
-    console.log("SIDS",this.props.streamIds);
     return (
       <div>
         <div style={styles.panel}>
@@ -149,6 +196,8 @@ class AppRoom extends React.Component {
             style={styles.controls}
             room={this.props.room}
          />
+         
+         {this.returnDialog()}
 
       </div>
     );

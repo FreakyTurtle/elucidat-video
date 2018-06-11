@@ -88,7 +88,9 @@ class AppWelcome extends React.Component {
         if(text.indexOf('download-progress') > -1){
             let perc = parseInt(text.split(':')[1], 10)
             this.setState({
-                updatePerc: perc
+                updatePerc: perc,
+                checkedUpdates: true,
+                gettingUpdates: true
             });
             return;
         }

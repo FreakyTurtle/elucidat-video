@@ -5,8 +5,9 @@ let localStream;
 let remoteStreams = {};
 let room;
 let isSpeaking = '';
+let updating
 
-var pcs = window.pcs = {};
+var pcs = window.pcs ={};
 var timestampPrev = 0;
 var bytesPrev = 0;
 
@@ -190,7 +191,6 @@ const screenshare = (sharingScreen, source) => {
               updateConnection(key);
           }
       }
-      console.log("localstream track", localStream.getVideoTracks()[0]);
       let screenshareEvent = new CustomEvent('screenshareToggle');
       window.dispatchEvent(screenshareEvent);
       resolve(localStream);
@@ -297,7 +297,11 @@ socket.on('message', (fromId, msg) => {
         if(pcs[fromId]){
           // lets set the remote to their response
           console.log(" setting remote description");
-          pcs[fromId].setRemoteDescription(new RTCSessionDescription(msg));
+          try {
+              pcs[fromId].setRemoteDescription(new RTCSessionDescription(msg));
+          } catch (e) {
+            console.log("ERROR: ", e);  
+          }
         }
         break;
       case 'candidate':
@@ -406,26 +410,27 @@ const handleRemoteStreamRemoved= (event, id) => {
 
 
 const updateBandwidth = (bandwidth = 'auto') => {
+    default_bandwidth = bandwidth;
   for (var id in pcs) {
     if (pcs.hasOwnProperty(id)) {
-      pcs[id].createOffer()
-      .then((offer) => {
-        default_bandwidth = bandwidth;
-        console.log("<<< bw:", default_bandwidth);
-        pcs[id].createOffer().then((offer) => {
-          setLocalAndSendMessage(offer, id)
-        });
-      }).catch((error) => {
-        console.log(error.message);
-      })
+     updateConnection(id)
+      // pcs[id].createOffer()
+      // // .then((offer) => {
+      // //   console.log("<<< bw:", default_bandwidth);
+      // //   console.log("<<< offer:", offer);
+      // //    // return setLocalAndSendMessage(offer, id);
+      // //    updateConnection(id)
+      // // }).catch((error) => {
+      // //   console.log(error.message);
+      // // })
 
     }
   }
 }
 
 const setMediaBitrates = (sdp, bw) => {
-  if(default_bandwidth === 'auto'){
-    return setMediaBitrate(sdp, [2500 * 0.1, 2500 * 0.9]);
+  if(!bw){
+    return setMediaBitrate(sdp);
   }
   return setMediaBitrate(sdp, bw);
 }
@@ -476,13 +481,13 @@ const setMediaBitrate = (sdp, bandwidth) => {
 }
 
 const doCall = (id) => {
-  console.log('Sending offer to peer');
+  console.log('Sending offer to peer', default_bandwidth);
   pcs[id].createOffer().then(
     (sd) => {return setLocalAndSendMessage(sd, id)},
     handleCreateOfferError);
 }
 
-const setLocalAndSendMessage = (sessionDescription, id, bw=[((default_bandwidth * 0.1) > 50) ? (default_bandwidth * 0.1) : 50, default_bandwidth * 0.9]) => {
+const setLocalAndSendMessage = (sessionDescription, id, bw = (default_bandwidth === 'auto') ? [500, 4500] : [((default_bandwidth * 0.1) > 50) ? (default_bandwidth * 0.1) : 50, (default_bandwidth * 0.9)]) => {
   pcs[id].setLocalDescription(sessionDescription);
   console.log('setLocalAndSendMessage sending message', sessionDescription);
   sessionDescription.sdp = setMediaBitrates(sessionDescription.sdp, bw);
@@ -494,10 +499,10 @@ const handleCreateOfferError = (event) => {
 }
 
 const doAnswer = (id, bw) => {
-  console.log('Sending answer to peer.');
   pcs[id].createAnswer()
   .then(
     (sd) => {
+        console.log('Sending answer to peer.', bw);
       setLocalAndSendMessage(sd, id, bw);
     }
   ).catch(onCreateSessionDescriptionError);

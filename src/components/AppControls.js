@@ -67,16 +67,18 @@ class AppControls extends React.Component {
       return (
         <SelectField
           value={this.state.value}
+          hintText="Bandwidth"
           onChange={this.handleBandwidth}
-          style={{...styles.button, width: 96}}
+          style={{...styles.button, width: 120}}
           underlineStyle={styles.underline}
         >
-          <MenuItem value={"auto"} primaryText="Auto" />
-          <MenuItem value={"10"} primaryText="10kbps" />
+          <MenuItem value={"auto"} primaryText="Auto (5mbps)" />
           <MenuItem value={"100"} primaryText="100kbps" />
           <MenuItem value={"125"} primaryText="125kbps" />
           <MenuItem value={"250"} primaryText="250kbps" />
           <MenuItem value={"500"} primaryText="500kbps" />
+          <MenuItem value={"1000"} primaryText="1000kbps" />
+          <MenuItem value={"2500"} primaryText="2500kbps" />
         </SelectField>
       );
     }
@@ -224,12 +226,12 @@ class AppControls extends React.Component {
           >
             <div style={{...styles.icon, ...styles.button, "padding": 12, "fontFamily": Theme.fontFamily, minHeight: 48, boxSizing: 'border-box'}}>{this.props.room}</div>
             {this.hangupBtn(this.onHangup)}
+            {this.bandwidth()}
             {this.cameraBtn(this.props.muteVideo, this.handleVideoMuting)}
             {this.micBtn(this.props.muteMic, this.onMicClick)}
             {this.muteBtn(this.props.muteAll, this.toggleMuteAll)}
             {this.zoomBtn(this.props.zoom, this.toggleZoom)}
             {this.screenBtn(this.props.screensharing, this.onScreenShareClick)}
-            {this.bandwidth()}
 
             {this.inputPicker}
             <SourcesDialog
