@@ -146,14 +146,15 @@ class AppWelcome extends React.Component {
           return (
               <div style={style.container}>
                 <CircularProgress size={60} thickness={7} />
-                <CardText>Checking for updates...</CardText>
+                <CardText>Checking available updates...</CardText>
               </div>
           )
       }else if(gu){
           return (
-              <div style={style.container}>
-                <LinearProgress mode="determinate" value={this.state.updatePerc} />
-              </div>
+            <div>
+                <LinearProgress style={{width:250}} mode="determinate" value={this.state.updatePerc} />
+                <CardText style={{textAlign:'center'}}>Downloading updates...</CardText>
+            </div>
           )
       }else{
           return (

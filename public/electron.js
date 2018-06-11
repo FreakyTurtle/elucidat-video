@@ -16,10 +16,8 @@ let mainWindow;
 let updateStatus = 'checking-for-update';
 
 let browser_options = {
-    width: 1000,
-    height: 600,
-    'min-width': 400,
-    'min-height': 225,
+    width: 800,
+    height: 450,
     webPreferences: {
       devTools: false
     }

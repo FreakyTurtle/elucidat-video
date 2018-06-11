@@ -7,34 +7,9 @@ let room;
 let isSpeaking = '';
 let updating
 
-var pcs = window.pcs ={};
+var pcs = {};
 var timestampPrev = 0;
 var bytesPrev = 0;
-
-window.stats = (pc) => {
-  pc.getStats((results) => {
-    // calculate video bitrate
-    console.log("res: ", results)
-  results.forEach(function(report) {
-    var now = report.timestamp;
-
-    var bitrate;
-    if (report.type === 'inbound-rtp' && report.mediaType === 'video') {
-      var bytes = report.bytesReceived;
-      if (timestampPrev) {
-        bitrate = 8 * (bytes - bytesPrev) / (now - timestampPrev);
-        bitrate = Math.floor(bitrate);
-      }
-      bytesPrev = bytes;
-      timestampPrev = now;
-    }
-    if (bitrate) {
-      bitrate += ' kbits/sec';
-      console.log("bitrate", bitrate);
-    }
-  });
-  })
-}
 // var turnReady;
 
 var pcConfig = {
@@ -300,7 +275,7 @@ socket.on('message', (fromId, msg) => {
           try {
               pcs[fromId].setRemoteDescription(new RTCSessionDescription(msg));
           } catch (e) {
-            console.log("ERROR: ", e);  
+            console.log("ERROR: ", e);
           }
         }
         break;
