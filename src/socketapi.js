@@ -191,6 +191,7 @@ const hangup = () => {
           pcs[i].close();
         }
         sendMessage('bye');
+        socket.close();
         resolve();
     });
 }
@@ -494,6 +495,10 @@ const handleRemoteHangup = (id) => {
 
 const stop = (id) => {
   try {
+    console.log("======================="+id+"============================")
+    console.log(pcs[id]);
+    console.log(pcs);
+    console.log("===================================================")
     pcs[id].close();
     pcs[id] = undefined;
     delete pcs[id];

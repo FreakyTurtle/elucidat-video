@@ -80,6 +80,10 @@ class AppRoom extends React.Component {
     };
 
   }
+  
+  componentWillUnmount() {
+      window.socketapi = undefined;
+  }
 
   componentDidMount() {
     //initiate the local feed and try to join the room

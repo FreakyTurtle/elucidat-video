@@ -148,7 +148,12 @@ class AppControls extends React.Component {
     onHangup = () => {
         socketapi.hangup().then(() => {
             console.log("hung up socket");
-            ipcRenderer.send('hangup');
+            // ipcRenderer.send('hangup');
+            this.props.action.removeAllStreams();
+            console.log("============STREAMS", this.props.streams)
+            console.log("============STREAMS", this.props.streamIds)
+            
+            this.props.action.gotoWelcome();
         });
     }
 

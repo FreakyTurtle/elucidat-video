@@ -14,13 +14,15 @@ export default (state = default_streams, payload) => {
         }
       return [...new_state];
     case 'REMOVE_STREAM':
-        for (var i = 0; i < new_state.length; i++) {
-            if(new_state[i] === payload.item){
-                new_state[i] = "";
+        for (var j = 0; j < new_state.length; j++) {
+            if(new_state[j] === payload.item){
+                new_state[j] = "";
                 break;
             }
         }
       return [...new_state];
+    case 'REMOVE_ALL_STREAMS':  
+        return state;
     default:
       return state;
   }

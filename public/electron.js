@@ -38,9 +38,9 @@ ipcMain.on('ping', (event, arg) => {
     event.sender.send('pong', updateStatus);
   })
 ipcMain.on('hangup', (event, arg) => {
-    if(mainWindow){
-        mainWindow.reload();
-    }
+    // if(mainWindow){
+    //     mainWindow.reload();
+    // }
   })
 
 function createWindow () {

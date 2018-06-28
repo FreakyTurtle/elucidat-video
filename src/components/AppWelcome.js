@@ -75,11 +75,19 @@ class AppWelcome extends React.Component {
   }
 
     componentDidMount() {
+        console.log("========COMPONENT MOUNTED");
+        console.log("============STREAMS", this.props.streams)
+        console.log("============STREAMS", this.props.streamIds)
         if (isElectron()) {
             ipcRenderer.send('ping');
             ipcRenderer.on('message', this.updateStatus);
             ipcRenderer.on('pong', this.updateStatus);
         }
+    }
+    componentWillUnmount() {
+        ipcRenderer.removeAllListeners('message');
+        ipcRenderer.removeAllListeners('pong');
+        
     }
 
     updateStatus = (event, text) => {

@@ -19,6 +19,12 @@ export const changeSelected= (item) => {
         item
     }
 }
+export const removeAllStreams = () => {
+    console.log('REMOVING ALL STREAMS');
+    return {
+        type: 'REMOVE_ALL_STREAMS'
+    }
+}
 export const unSelected= () => {
     console.log('UNSELECTED STREAM');
     return {
