@@ -9,9 +9,8 @@
 
 .videoContainer{
   /* Default video container styling */
-  max-width: 20%;
+  max-width: 12.5%;
   min-width: 8.33%;
-  height: 120px;
   overflow: hidden;
   box-sizing: border-box;
   position: relative;
@@ -23,6 +22,17 @@
 
 .videoContainer > video {
   object-fit: cover;
+  height: 100%;
+  width: 100%;
+  vertical-align: bottom;
+}
+.videoContainer > video.local {
+  object-fit: cover;
+  transform: scale(-1, 1);
+}
+.videoContainer > video.local.screensharing {
+  object-fit: cover;
+  transform: scale(1, 1);
 }
 .videoContainer.contain.focus > video {
   object-fit: contain;

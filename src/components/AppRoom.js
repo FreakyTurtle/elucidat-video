@@ -72,6 +72,11 @@ class AppRoom extends React.Component {
   constructor(props) {
     super(props);
     this.returnVideo = this.returnVideo.bind(this);
+    this.onRoomJoinedCallback = this.onRoomJoinedCallback.bind(this);
+    this.onRoomFullCallback = this.onRoomFullCallback.bind(this);
+    this.onStreamAddedCallback = this.onStreamAddedCallback.bind(this);
+    this.onStreamRemovedCallback = this.onStreamRemovedCallback.bind(this);
+    this.onActiveChangeCallback = this.onActiveChangeCallback.bind(this);
     window.socketapi = socketapi;
 
 
@@ -83,31 +88,31 @@ class AppRoom extends React.Component {
   
   componentWillUnmount() {
       window.socketapi = undefined;
+      this.props.action.removeAllStreams();
+      socketapi.removeOnRoomJoined(this.onRoomJoinedCallback);
+      socketapi.removeOnRoomFull(this.onRoomFullCallback);
+      socketapi.removeOnStreamAdded(this.onStreamAddedCallback);
+      socketapi.removeOnStreamRemoved(this.onStreamRemovedCallback);
+      socketapi.removeOnActiveChange(this.onActiveChangeCallback);
   }
-
-  componentDidMount() {
-    //initiate the local feed and try to join the room
-    socketapi.init(this.props.room);
-
-    socketapi.onRoomJoined((event) => {
-      this.setState({
-        roomState: 'joined'
-    });
-    })
-
-    socketapi.onRoomFull((event) => {
+  
+  /////////////////// SOCKETAPI CALLBACKS //////////////////////
+  onRoomJoinedCallback = (event) => {
+    this.setState({
+          roomState: 'joined'
+      });
+  }
+  onRoomFullCallback = (event) => {
       this.setState({
         roomState: 'full'
-      })
-    })
-
-    socketapi.onStreamAdded((event) => {
+    });
+  }
+  onStreamAddedCallback = (event) => {
       console.log("=====Client stream added: ", event.detail);
       let id = event.detail;
       this.props.action.addStream(id);
-    });
-
-    socketapi.onStreamRemoved((event) => {
+  }
+  onStreamRemovedCallback = (event) => {
       console.log("=====Client stream removed: ", event.detail);
       let id = event.detail;
       if(id === this.props.selectedStream){
@@ -117,19 +122,24 @@ class AppRoom extends React.Component {
         this.props.action.changeActive("local");
       }
       this.props.action.removeStream(id);
-    });
-
-    socketapi.onActiveChange((event) => {
+  }
+  
+  onActiveChangeCallback = (event) => {
       console.log("======Active Stream change: ", event.detail);
       this.props.action.changeActive(event.detail);
-    })
+  }
+  
+  ////////////////////////////
 
-      // desktopCapturer.getSources({types: ['window', 'screen'], thumbnailSize:{width:180, height:180}}, (error, sources) => {
-      //     console.log("sources", sources);
-      //   this.setState({
-      //       sources
-      //   });
-      // });
+  componentDidMount() {
+    //initiate the local feed and try to join the room
+    socketapi.init(this.props.room);
+    socketapi.onRoomJoined(this.onRoomJoinedCallback);
+    socketapi.onRoomFull(this.onRoomFullCallback);
+    socketapi.onStreamAdded(this.onStreamAddedCallback);
+    socketapi.onStreamRemoved(this.onStreamRemovedCallback);
+    socketapi.onActiveChange(this.onActiveChangeCallback);
+
   }
 
   returnVideo = (streamId, index) => {

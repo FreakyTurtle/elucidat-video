@@ -146,15 +146,13 @@ class AppControls extends React.Component {
 
     //Hang up the call and leave the room
     onHangup = () => {
-        socketapi.hangup().then(() => {
-            console.log("hung up socket");
+        // socketapi.hangup().then(() => {
+            // console.log("hung up socket");
             // ipcRenderer.send('hangup');
             this.props.action.removeAllStreams();
-            console.log("============STREAMS", this.props.streams)
-            console.log("============STREAMS", this.props.streamIds)
-            
             this.props.action.gotoWelcome();
-        });
+            ipcRenderer.send('hangup');
+        // });
     }
 
     //change redux state to signal the local video stream should be muted

@@ -22,7 +22,7 @@ export default (state = default_streams, payload) => {
         }
       return [...new_state];
     case 'REMOVE_ALL_STREAMS':  
-        return state;
+        return default_streams;
     default:
       return state;
   }

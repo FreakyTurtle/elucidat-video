@@ -6,6 +6,7 @@ let remoteStreams = {};
 let room;
 let isSpeaking = '';
 let updating
+let muted = false;
 
 var pcs = {};
 var timestampPrev = 0;
@@ -97,29 +98,61 @@ const getLocalStream = () => localStream;
 
 const getRemoteStream = (id) => remoteStreams[id];
 
-
 const onRoomJoined = (callback) => {
   window.addEventListener('roomjoined', callback);
   window.addEventListener('roomcreated', callback);
+}
+const removeOnRoomJoined = (callback) => {
+    window.removeEventListener("roomjoined", callback);
+    window.removeEventListener("roomcreated", callback);
 }
 
 const onRoomFull = (callback) => {
   window.addEventListener('roomfull', callback);
 }
+const removeOnRoomFull = (callback) => {
+    window.removeEventListener("roomfull", callback);
+}
 
 const onStreamAdded = (callback) => {
   window.addEventListener('streamAdded', callback);
+}
+const removeOnStreamAdded = (callback) => {
+  window.removeEventListener('streamAdded', callback);
 }
 
 const onStreamRemoved = (callback) => {
   window.addEventListener('streamRemoved', callback);
 }
+const removeOnStreamRemoved = (callback) => {
+  window.removeEventListener('streamRemoved', callback);
+}
 const onStreamChanged = (callback) => {
   window.addEventListener('streamChanged', callback);
+}
+const removeOnStreamChanged = (callback) => {
+  window.removeEventListener('streamChanged', callback);
 }
 
 const onScreenshareToggle = (callback) => {
   window.addEventListener('screenshareToggle', callback);
+}
+const removeOnScreenshareToggle = (callback) => {
+  window.removeEventListener('screenshareToggle', callback);
+}
+
+const onStreamMuted = (callback) => {
+    window.addEventListener('streamMuted', callback);
+}
+const removeOnStreamMuted = (callback) => {
+    window.removeEventListener('streamMuted', callback);
+}
+
+const onStreamUnmuted = (callback) => {
+    window.addEventListener('streamUnmuted', callback);
+}
+const removeOnStreamUnmuted = (callback) => {
+    window.removeEventListener('streamUnmuted', callback);
 }
 
 // const onLocalStreamAdded = (callback) => {
@@ -128,6 +161,9 @@ const onScreenshareToggle = (callback) => {
 
 const onActiveChange = (callback) => {
   window.addEventListener('activeChange', callback);
+}
+const removeOnActiveChange = (callback) => {
+  window.removeEventListener('activeChange', callback);
 }
 
 const muteVideo = () => {
@@ -139,13 +175,18 @@ const unmuteVideo = () => {
 const muteAudio = () => {
   for (var i = 0; i <localStream.getAudioTracks().length; i++) {
     localStream.getAudioTracks()[i].enabled = false;
+    muted = true;
+    sendMessage('muted');
   }
 }
 const unmuteAudio = () => {
   for (var i = 0; i <localStream.getAudioTracks().length; i++) {
     localStream.getAudioTracks()[i].enabled = true;
+    muted = false;
+    sendMessage('unmuted');
   }
 }
+
 
 const screenshare = (sharingScreen, source) => {
   return new Promise((resolve, reject) => {
@@ -191,7 +232,6 @@ const hangup = () => {
           pcs[i].close();
         }
         sendMessage('bye');
-        socket.close();
         resolve();
     });
 }
@@ -242,7 +282,14 @@ socket.on('message', (fromId, msg) => {
   if (msg === 'bye') {
     // a remote peer is hanging up, bye felicia
     handleRemoteHangup(fromId);
-  }else if ( msg && msg.type ){
+}else if(msg === 'muted'){
+    let mutedEvent = new CustomEvent('streamMuted', { detail: fromId });
+    window.dispatchEvent(mutedEvent);
+}else if(msg === 'unmuted'){
+    let unmutedEvent = new CustomEvent('streamUnmuted', { detail: fromId });
+    window.dispatchEvent(unmutedEvent);
+}
+else if ( msg && msg.type ){
     switch (msg.type) {
       case 'offer':
         let changingStreams = false;
@@ -375,6 +422,9 @@ const handleRemoteStreamAdded = (event, id) => {
   })
   let addedEvent = new CustomEvent('streamAdded', { detail: id });
   window.dispatchEvent(addedEvent);
+  if(muted){
+      sendMessage('muted', id);
+  }
 }
 
 const handleRemoteStreamRemoved= (event, id) => {
@@ -522,12 +572,23 @@ const socketapi = {
   init,
   getLocalStream,
   onStreamAdded,
+  removeOnStreamAdded,
   onStreamRemoved,
+  removeOnStreamRemoved,
   onStreamChanged,
+  removeOnStreamChanged,
   onActiveChange,
+  removeOnActiveChange,
   onScreenshareToggle,
+  removeOnScreenshareToggle,
   onRoomJoined,
+  removeOnRoomJoined,
   onRoomFull,
+  removeOnRoomFull,
+  onStreamMuted,
+  removeOnStreamMuted,
+  onStreamUnmuted,
+  removeOnStreamUnmuted,
   getRemoteStream,
   muteVideo,
   unmuteVideo,

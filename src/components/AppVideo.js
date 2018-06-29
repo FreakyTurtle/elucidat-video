@@ -4,11 +4,6 @@ import * as Actions from '../actions';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
-let style = {
-  height: '100%',
-  width: '100%',
-};
-
 let socketapi;
 
 class AppVideo extends React.Component {
@@ -16,21 +11,39 @@ class AppVideo extends React.Component {
         super(props);
         this.refVideo = this.refVideo.bind(this);
         this.returnVideo = this.returnVideo.bind(this);
+        this.onScreenshareToggleCallback = this.onScreenshareToggleCallback.bind(this);
+        this.onStreamChangedCallback = this.onStreamChangedCallback.bind(this);
         this.video;
-        socketapi = window.socketapi
+        socketapi = window.socketapi;
     }
-
-    componentDidMount = () => {
-      socketapi.onScreenshareToggle((event) => {
+    //// Callbacks /////
+    
+    onScreenshareToggleCallback = (event) => {
         if(this.props.thisKey === 'local'){
           this.video.srcObject = socketapi.getLocalStream();
+          if(this.video.classList.contains("screensharing")){
+              this.video.classList.remove("screensharing");
+          }else{
+              this.video.classList.add("screensharing");
+          }
         }
-      });
-      socketapi.onStreamChanged((event) => {
+    }
+    onStreamChangedCallback = (event) => {
         if (this.props.thisKey !== 'local' && this.props.thisKey !== "" && this.props.thisKey === event.detail){
           this.video.srcObject = socketapi.getRemoteStream(this.props.thisKey);
         }
-      })
+    }
+    
+    //////
+    
+    componentWillUnmount = () => {
+        socketapi.removeOnScreenshareToggle(this.onScreenshareToggleCallback);
+        socketapi.removeOnStreamChanged(this.onStreamChangedCallback);
+    }
+
+    componentDidMount = () => {
+      socketapi.onScreenshareToggle(this.onScreenshareToggleCallback);
+      socketapi.onStreamChanged(this.onStreamChangedCallback);
     }
 
     shouldComponentUpdate(nextProps, nextState) {
@@ -69,15 +82,18 @@ class AppVideo extends React.Component {
       if(this.props.thisKey === ''){
         return null;
       }
-      let s = {...style};
+      let classes = "";
       if(this.props.thisKey === 'local'){
-          s = {...style, transform: 'scale(-1, 1)'}
+          classes = "local";
+      }
+      if(this.props.screensharing){
+          classes = classes + " screensharing";
       }
       return (
         <video
           autoPlay
+          className={classes}
           onClick={this.props.onclick}
-          style={s}
           id={this.props.thisKey}
           key={this.props.thisKey}
           ref={this.refVideo}
