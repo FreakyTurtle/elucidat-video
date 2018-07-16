@@ -18,6 +18,8 @@ let updateStatus = 'checking-for-update';
 let browser_options = {
     width: 800,
     height: 450,
+    'minHeight': 450,
+    'minWidth': 800,
     webPreferences: {
       devTools: false
     }

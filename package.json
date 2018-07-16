@@ -8,17 +8,17 @@
   "description": "Elucidat Video",
   "homepage": "./",
   "dependencies": {
-    "electron-updater": "^2.21.10",
+    "electron-updater": "^2.23.3",
     "hark": "^1.2.0",
     "is-electron": "^2.1.0",
     "material-ui": "^0.20.1",
-    "react": "^16.3.2",
-    "react-dom": "^16.3.2",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
     "react-redux": "^5.0.7",
     "react-scripts": "1.1.4",
     "redux": "^4.0.0",
     "socket.io-client": "^2.1.1",
-    "webrtc-adapter": "^6.2.1"
+    "webrtc-adapter": "^6.3.0"
   },
   "scripts": {
     "build": "react-scripts build",
@@ -45,10 +45,10 @@
     }
   },
   "devDependencies": {
-    "concurrently": "^3.5.1",
-    "electron": "^2.0.0",
-    "electron-builder": "^20.15.1",
-    "electron-packager": "^12.0.2",
+    "concurrently": "^3.6.0",
+    "electron": "^2.0.4",
+    "electron-builder": "^20.20.4",
+    "electron-packager": "^12.1.0",
     "wait-on": "^2.1.0"
   }
 }

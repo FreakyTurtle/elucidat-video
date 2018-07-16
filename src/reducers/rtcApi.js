@@ -1,2 +1,0 @@
-let remoteStreams = {};
-let localStream;

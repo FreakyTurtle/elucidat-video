@@ -10,6 +10,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import AppVideoContainer from './AppVideoContainer';
 import {red500} from 'material-ui/styles/colors';
+import bell from '../bell.mp3';
 const { desktopCapturer, ipcRenderer } = window.require('electron');
 
 const styles = {
@@ -77,6 +78,9 @@ class AppRoom extends React.Component {
     this.onStreamAddedCallback = this.onStreamAddedCallback.bind(this);
     this.onStreamRemovedCallback = this.onStreamRemovedCallback.bind(this);
     this.onActiveChangeCallback = this.onActiveChangeCallback.bind(this);
+    this.onNewArrivalCallback = this.onNewArrivalCallback.bind(this);
+    this.bell = new Audio(bell);
+    this.bell.volume = 1;
     window.socketapi = socketapi;
 
 
@@ -85,7 +89,7 @@ class AppRoom extends React.Component {
     };
 
   }
-  
+
   componentWillUnmount() {
       window.socketapi = undefined;
       this.props.action.removeAllStreams();
@@ -94,8 +98,9 @@ class AppRoom extends React.Component {
       socketapi.removeOnStreamAdded(this.onStreamAddedCallback);
       socketapi.removeOnStreamRemoved(this.onStreamRemovedCallback);
       socketapi.removeOnActiveChange(this.onActiveChangeCallback);
+      socketapi.removeOnNewArrival(this.onNewArrivalCallback);
   }
-  
+
   /////////////////// SOCKETAPI CALLBACKS //////////////////////
   onRoomJoinedCallback = (event) => {
     this.setState({
@@ -123,23 +128,27 @@ class AppRoom extends React.Component {
       }
       this.props.action.removeStream(id);
   }
-  
+
   onActiveChangeCallback = (event) => {
       console.log("======Active Stream change: ", event.detail);
       this.props.action.changeActive(event.detail);
   }
-  
+
+  onNewArrivalCallback = (event) => {
+      this.bell.play();
+  }
+
   ////////////////////////////
 
   componentDidMount() {
     //initiate the local feed and try to join the room
-    socketapi.init(this.props.room);
+    socketapi.init(this.props.room, this.props.username);
     socketapi.onRoomJoined(this.onRoomJoinedCallback);
     socketapi.onRoomFull(this.onRoomFullCallback);
     socketapi.onStreamAdded(this.onStreamAddedCallback);
     socketapi.onStreamRemoved(this.onStreamRemovedCallback);
     socketapi.onActiveChange(this.onActiveChangeCallback);
-
+    socketapi.onNewArrival(this.onNewArrivalCallback);
   }
 
   returnVideo = (streamId, index) => {
@@ -150,7 +159,7 @@ class AppRoom extends React.Component {
               />
       )
   }
-  
+
   returnDialog = () => {
       const actions = [
       <FlatButton
@@ -185,7 +194,7 @@ class AppRoom extends React.Component {
               contentStyle ={styles.dialog}
             >
             <CardText>Sorry! That room is full at the moment!</CardText>
-            
+
             </Dialog>)
       }else{
           return null;
@@ -205,12 +214,11 @@ class AppRoom extends React.Component {
         <div style={styles.panel}>
           {Object.keys(this.props.streamIds).map(this.returnVideo)}
         </div>
-
         <AppControls
             style={styles.controls}
             room={this.props.room}
          />
-         
+
          {this.returnDialog()}
 
       </div>

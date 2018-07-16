@@ -6,3 +6,4 @@ export * from './handleMuteMic';
 export * from './handleMuteVideo';
 export * from './handleToggleScreenshare';
 export * from './handleToggleZoom';
+export * from './handleMessages';

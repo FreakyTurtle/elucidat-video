@@ -62,6 +62,7 @@ class AppWelcome extends React.Component {
     this.checkUpdates = this.checkUpdates.bind(this);
     this.updateStatus = this.updateStatus.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.onChangeUsername = this.onChangeUsername.bind(this);
     this.rooms = JSON.parse(localStorage.getItem("rooms"));
     this.state = {
       room: '',
@@ -70,6 +71,7 @@ class AppWelcome extends React.Component {
       checkedUpdates: false,
       updatePerc: 0,
       dataSource: [],
+      username: localStorage.getItem("un") ? localStorage.getItem('un') : ""
     }
 
   }
@@ -87,7 +89,15 @@ class AppWelcome extends React.Component {
     componentWillUnmount() {
         ipcRenderer.removeAllListeners('message');
         ipcRenderer.removeAllListeners('pong');
-        
+
+    }
+
+    onChangeUsername = (event, newValue) => {
+        this.setState({
+            username: newValue,
+            disabled: (newValue && this.state.room) ? false : true
+        });
+        localStorage.setItem("un", newValue);
     }
 
     updateStatus = (event, text) => {
@@ -133,7 +143,9 @@ class AppWelcome extends React.Component {
     let disabled = true;
     let dataSource = [];
     if(newValue){
-      disabled = false;
+        if(this.state.username){
+            disabled = false;
+        }
       if(this.rooms){
         for (var i = 0; i < this.rooms.length; i++) {
           if(this.rooms[i].indexOf(newValue) > -1){
@@ -167,6 +179,12 @@ class AppWelcome extends React.Component {
       }else{
           return (
               <div style={style.container}>
+              <TextField
+                    hintText="Username"
+                    floatingLabelText="Username"
+                    value={this.state.username}
+                    onChange={this.onChangeUsername}
+                />
               <AutoComplete
                 floatingLabelText="Join or Create Room"
                 hintStyle={style.hint}

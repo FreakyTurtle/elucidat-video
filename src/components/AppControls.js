@@ -4,6 +4,8 @@ import FontIcon from 'material-ui/FontIcon';
 import Theme from '../theme.js';
 import {red500} from 'material-ui/styles/colors';
 import SourcesDialog from './SourcesDialog';
+import AppMessages from './AppMessages';
+import notification from '../notification.mp3';
 
 import * as Actions from '../actions';
 import { bindActionCreators } from 'redux';
@@ -39,12 +41,18 @@ class AppControls extends React.Component {
       this.returnBtn = this.returnBtn.bind(this);
       this.micBtn = this.micBtn.bind(this);
       this.screenBtn = this.screenBtn.bind(this);
+      this.newMessage =this.newMessage.bind(this);
+      this.onDataReceivedCallback = this.onDataReceivedCallback.bind(this);
       socketapi = window.socketapi;
+      this.notification = new Audio(notification);
+      this.notification.volume = 1;
       this.state = {
         visible: true,
         dialogopen: false,
         sources: {},
-        value: 'auto'
+        value: '2500',
+        msgsOpen: false,
+        unreadMsgs: false
       }
     }
 
@@ -63,6 +71,33 @@ class AppControls extends React.Component {
       this.setState({value});
     };
 
+    componentDidMount() {
+      //initiate the local feed and try to join the room
+      socketapi.onDataReceived(this.onDataReceivedCallback);
+    }
+
+    componentWillUnmount() {
+        socketapi.removeOnDataReceived(this.onDataReceivedCallback);
+    }
+
+    onDataReceivedCallback = (event) => {
+        console.log("====ON DATA RECEIVED CALLBACK====", event);
+        if(!event.detail.data){
+            return false;
+        }
+
+        let newMsg = JSON.parse(event.detail.data);
+        if(newMsg.type === 'text'){
+            this.notification.play();
+            this.props.action.addMessage(newMsg);
+        }
+        if(!this.state.msgsOpen){
+            this.setState({
+                unreadMsgs: true
+            });
+        };
+    }
+
     bandwidth = () => {
       return (
         <SelectField
@@ -72,13 +107,13 @@ class AppControls extends React.Component {
           style={{...styles.button, width: 120}}
           underlineStyle={styles.underline}
         >
-          <MenuItem value={"auto"} primaryText="Auto (5mbps)" />
           <MenuItem value={"100"} primaryText="100kbps" />
           <MenuItem value={"125"} primaryText="125kbps" />
           <MenuItem value={"250"} primaryText="250kbps" />
           <MenuItem value={"500"} primaryText="500kbps" />
           <MenuItem value={"1000"} primaryText="1000kbps" />
           <MenuItem value={"2500"} primaryText="2500kbps" />
+          <MenuItem value={"auto"} primaryText="5000kbps" />
         </SelectField>
       );
     }
@@ -141,11 +176,41 @@ class AppControls extends React.Component {
     }
 
 
+    msgBtn = (onclick) => {
+        return this.returnBtn("Messages", "fas fa-comments", "bottom-center", this.state.unreadMsgs ? styles.icoff : styles.icon, onclick);
+    }
+
+
     ///////// HANDLE THE CLICKS /////////
+
+    toggleMessages = () => {
+        let newM = !this.state.msgsOpen;
+        this.setState({
+            msgsOpen: newM,
+            unreadMsgs: false
+        });
+    }
+
+    newMessage = (msg) => {
+        console.log("NEW MSG", msg);
+        let m = {
+            type: "text",
+            timestamp: Date.now(),
+            message: msg,
+            from_id: socketapi.getLocalClientId()
+        }
+        socketapi.sendData(JSON.stringify(m));
+        let ml = {
+            ...m,
+            from_id: 'local'
+        }
+        this.props.action.addMessage(ml);
+    }
 
 
     //Hang up the call and leave the room
     onHangup = () => {
+        console.log("===HANGING UP=====");
         // socketapi.hangup().then(() => {
             // console.log("hung up socket");
             // ipcRenderer.send('hangup');
@@ -214,6 +279,7 @@ class AppControls extends React.Component {
     };
 
     selectedSource = (source) => {
+        console.log("SELECTED SOURCE", source);
         // source for screensharing has been selected so lets use that to start screensharing
         if(!this.props.screensharing){
             socketapi.screenshare(true, source);
@@ -234,6 +300,7 @@ class AppControls extends React.Component {
             {this.micBtn(this.props.muteMic, this.onMicClick)}
             {this.muteBtn(this.props.muteAll, this.toggleMuteAll)}
             {this.zoomBtn(this.props.zoom, this.toggleZoom)}
+            {this.msgBtn(this.toggleMessages)}
             {this.screenBtn(this.props.screensharing, this.onScreenShareClick)}
 
             {this.inputPicker}
@@ -243,6 +310,11 @@ class AppControls extends React.Component {
                 onSelection={this.selectedSource}
                 onRequestClose={this.handleClose}
               />
+              <AppMessages
+                open={this.state.msgsOpen}
+                msgs={this.props.messages}
+                msgSubmit={this.newMessage}
+                />
           </div>
         )
     }

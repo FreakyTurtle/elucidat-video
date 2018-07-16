@@ -11,6 +11,7 @@ import streamIds from './streams';
 import activeStream from './activeStream';
 import selectedStream from './selectedStream';
 import zoom from './toggleZoom';
+import messages from './messages.js';
 
 const rootReducer = combineReducers({
   example,
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
   streamIds,
   selectedStream,
   activeStream,
+  messages,
   zoom
 });
 
