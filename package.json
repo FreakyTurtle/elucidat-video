@@ -1,6 +1,6 @@
 {
   "name": "ElucidatVideo",
-  "version": "0.4.1",
+  "version": "0.4.5",
   "private": true,
   "author": "Freaky Turtle",
   "main": "public/electron.js",
@@ -17,6 +17,7 @@
     "react-redux": "^5.0.7",
     "react-scripts": "1.1.4",
     "redux": "^4.0.0",
+    "simplertc": "^2.0.9",
     "socket.io-client": "^2.1.1",
     "webrtc-adapter": "^6.3.0"
   },
@@ -30,7 +31,8 @@
     "start": "ELECTRON_START_URL=http://localhost:3000/ concurrently \"npm run react-start\" \"wait-on http://localhost:3000 && npm run electron .\"",
     "pack": "build --dir",
     "dist": "build",
-    "electron-pack": "build -mwl -c.extraMetadata.main=build/electron.js",
+    "electron-pack": "build -c.extraMetadata.main=build/electron.js",
+    "electron-pack-all": "build -mwl -c.extraMetadata.main=build/electron.js",
     "preelectron-pack": "npm run build",
     "gh-publish": "build -c.extraMetadata.main=build/electron.js -p always"
   },

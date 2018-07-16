@@ -21,9 +21,23 @@ let browser_options = {
     'minHeight': 450,
     'minWidth': 800,
     webPreferences: {
-      devTools: false
+      devTools: true
     }
 }
+
+const template = [
+    {
+        label: 'Tools',
+        submenu: [
+            {
+                label: 'DevTools',
+                click(item, focusedWindow){
+                    focusedWindow.webContents.openDevTools()
+                }
+            }
+        ]
+    }
+]
 
 if(process.env.ELECTRON_START_URL){
     browser_options['webPreferences']['devTools'] = true;

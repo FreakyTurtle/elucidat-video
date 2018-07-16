@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 import hark from 'hark';
-// import {getMedia, Bond} from 'simplertc';
-import {getMedia, Bond} from 'easyrtc';
+import {getMedia, Bond} from 'simplertc';
+// import {getMedia, Bond} from 'easyrtc';
 
 let socket = io('https://opendesktopvideo.com/');
 // let socket = io('http://localhost:8080/');
