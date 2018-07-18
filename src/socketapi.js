@@ -1,7 +1,7 @@
 import io from 'socket.io-client';
 import hark from 'hark';
-// import {getMedia, Bond} from 'simplertc';
-import {simplertc} from 'easyrtc';
+import {getMedia, Bond} from 'simplertc';
+// import {simplertc} from 'easyrtc';
 
 let socket = io('https://opendesktopvideo.com/');
 // let socket = io('http://localhost:8080/');
@@ -16,7 +16,6 @@ let this_id = '';
 let whoami_verification = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 let littleBlackBook = {};
 
-console.log("SIMPLERTC", simplertc)
 
 const video = {
   optional: [
@@ -47,7 +46,7 @@ const init = (roomToJoin, username = localStorage.getItem('un') ? localStorage.g
     return new Promise((resolve, reject) => {
         if(roomToJoin){
             room = roomToJoin;
-            simplertc.getMedia().then((stream) => {
+            getMedia().then((stream) => {
                 localStream = stream;
                 //ok sweet, local stream is set up, lets join a room
                 socket.emit('create or join', room);
@@ -83,7 +82,7 @@ socket.on('join', function(room, id){
     //Someone has joined our room!
     console.log("Someone with id " + id + " has joined room: " + room);
     /////THIS IS WHERE WE SHOULD START THE HANDSHAKING
-    bonds[id] = new simplertc.Bond(localStream, id, sendMessage, callbacks);
+    bonds[id] = new Bond(localStream, id, sendMessage, callbacks);
     bonds[id].createAndSendOffer();
     sendMessage({
         type: 'whoami',
@@ -132,7 +131,7 @@ socket.on('message', (fromId, msg) => {
                 if(bonds[fromId]){
                     bonds[fromId].receivedOffer(msg);
                 }else{
-                    bonds[fromId] = new simplertc.Bond(localStream, fromId, sendMessage, callbacks);
+                    bonds[fromId] = new Bond(localStream, fromId, sendMessage, callbacks);
                     bonds[fromId].receivedOffer(msg);
                 }
                 if(bonds[fromId] && bonds[fromId].getIceConnectionState && ['new', 'failed', 'checking', 'disconnected', 'closed'].indexOf(bonds[fromId].getIceConnectionState) === -1){
@@ -371,7 +370,7 @@ const screenshare = (sharingScreen, source) => {
             let constraints = screenshare_constraints;
             //we're sharing screen so lets get these
             constraints.video.mandatory['chromeMediaSourceId'] = source.id;
-            simplertc.getMedia(constraints.video, constraints.audio)
+            getMedia(constraints.video, constraints.audio)
             .then((stream) => {
                 console.log("got stream", stream.getVideoTracks());
 
@@ -399,7 +398,7 @@ const screenshare = (sharingScreen, source) => {
                 reject(error);
             });
         }else{
-            simplertc.getMedia()
+            getMedia()
             .then((stream) => {
                 console.log("NOT GOT SCREENSHARE");
                 //remove all the old video tracks

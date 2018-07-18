@@ -1,6 +1,6 @@
 {
   "name": "ElucidatVideo",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "private": true,
   "author": "Freaky Turtle",
   "main": "public/electron.js",
@@ -17,6 +17,7 @@
     "react-redux": "^5.0.7",
     "react-scripts": "1.1.4",
     "redux": "^4.0.0",
+    "simplertc": "^2.1.4",
     "socket.io-client": "^2.1.1",
     "webrtc-adapter": "^6.3.0"
   },
