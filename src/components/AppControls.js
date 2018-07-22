@@ -193,6 +193,10 @@ class AppControls extends React.Component {
 
     newMessage = (msg) => {
         console.log("NEW MSG", msg);
+        if (msg.trim() === ""){
+            console.log("Blank message");
+            return false;
+        }
         let m = {
             type: "text",
             timestamp: Date.now(),
@@ -249,6 +253,7 @@ class AppControls extends React.Component {
 
     onScreenShareClick = () => {
         if(this.props.screensharing){
+            console.log("Already screensharing, getting video");
             // We're already screensharing so let's stop now
             socketapi.screenshare(false, null)
                 .then((stream) => {
@@ -257,6 +262,7 @@ class AppControls extends React.Component {
                     console.log(error.message);
                 })
         }else{
+            console.log("Not currently screensharing");
           //not currently screensharing, get available sources and show the dialog to select one
             desktopCapturer.getSources({
                 types: ['window', 'screen'],
@@ -282,9 +288,12 @@ class AppControls extends React.Component {
         console.log("SELECTED SOURCE", source);
         // source for screensharing has been selected so lets use that to start screensharing
         if(!this.props.screensharing){
-            socketapi.screenshare(true, source);
+            socketapi.screenshare(true, source).then(() => {
+                this.props.action.toggleScreenshare();
+            }).catch((error)=>{
+                console.error(error);
+            });
             this.handleClose();
-            this.props.action.toggleScreenshare();
         }
     }
 

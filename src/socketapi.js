@@ -22,9 +22,9 @@ const video = {
     {minWidth: 320},
     {minWidth: 640},
     {minWidth: 1024},
-    {minWidth: 1280}
-    // {minWidth: 1920},
-    // {minWidth: 2560},
+    {minWidth: 1280},
+    {minWidth: 1920},
+    {minWidth: 2560},
   ]
 }
 const audio = true;
@@ -370,7 +370,8 @@ const screenshare = (sharingScreen, source) => {
             let constraints = screenshare_constraints;
             //we're sharing screen so lets get these
             constraints.video.mandatory['chromeMediaSourceId'] = source.id;
-            getMedia(constraints.video, constraints.audio)
+            console.log("CONSTRAINTS", constraints);
+            getMedia(constraints.video, false)
             .then((stream) => {
                 console.log("got stream", stream.getVideoTracks());
 
